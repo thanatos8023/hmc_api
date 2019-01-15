@@ -712,75 +712,182 @@ router.post('/message', function (req, res, next) {
           // 확인해야할 사항 
           var ctlCommand = comResult[0].control_command;
           var temperature = comResult[0].temp;
+          var status = comResult[0].status;
 
-          if (ctlCommand == null) {
-            // 최초 진입 
-            // intention 에 따름
-            // DB 업데이트 필요함
-            switch(intention) {
-              case "Buttons" :
-                var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ? AND `chatbot_status` = ?"
-                connection.query(resSQL, ["Button", object.content], function (resError, resResult, resBody) {
-                  if (resError) {
-                    console.error("SERVER :: DB ERROR :: tb_response_text connection error");
-                    console.error(resError);
-                    res.end();
-                    return resError
-                  }  
-                  var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
-                  connection.query(updateSQL, [null, '200', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
-                    if (updError) {
-                      console.error("SERVER :: DB ERROR :: tb_command update error");
-                      console.error(updError);
-                      return updError
-                    }
+          if (object.content == "제어 결과 확인") { // 제어 결과 확인 버튼 
+            // DB 를 업데이트할 필요는 없음 
+            var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
+            connection.query(resSQL, ["Error", status], function (resError, resResult, resBody) {
+              if (resError) {
+                console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                console.error(resError);
+                res.end();
+                return resError
+              }
 
-                    res.json({
-                      "type": resResult[0].response_type,
-                      "text": resResult[0].response_text,
-                      "object1": resResult[0].response_object1,
-                      "object2": resResult[0].response_object2,
+              res.json({
+                "type": resResult[0].response_type,
+                "text": resResult[0].response_text,
+                "object1": resResult[0].response_object1,
+                "object2": resResult[0].response_object2,
+              });
+            });
+          } else {
+            if (ctlCommand == null) {
+              // 최초 진입 
+              // intention 에 따름
+              // DB 업데이트 필요함
+              switch(intention) {
+                case "Buttons" :
+                  var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ? AND `chatbot_status` = ?"
+                  connection.query(resSQL, ["Button", object.content], function (resError, resResult, resBody) {
+                    if (resError) {
+                      console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                      console.error(resError);
+                      res.end();
+                      return resError
+                    }  
+                    var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
+                    connection.query(updateSQL, [null, '200', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
+                      if (updError) {
+                        console.error("SERVER :: DB ERROR :: tb_command update error");
+                        console.error(updError);
+                        return updError
+                      }
+
+                      res.json({
+                        "type": resResult[0].response_type,
+                        "text": resResult[0].response_text,
+                        "object1": resResult[0].response_object1,
+                        "object2": resResult[0].response_object2,
+                      });
                     });
                   });
-                });
-                break;
+                  break;
 
-              case "UserRemove":
-                var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ?"
-                connection.query(resSQL, intention, function (resError, resResult, resBody) {
-                  if (resError) {
-                    console.error("SERVER :: DB ERROR :: tb_response_text connection error");
-                    console.error(resError);
-                    res.end();
-                    return resError
-                  }  
-                  var delSQL = "DELETE FROM `tb_user_info` WHERE `user_id`=?"
-                  connection.query(delSQL, object.user_key, function (delError, delResult, delBody) {
-                    if (delError) {
-                      console.error("SERVER :: DB ERROR :: tb_user_info deletion error");
-                      console.error(delError);
-                      return delError
-                    }
+                case "UserRemove":
+                  var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ?"
+                  connection.query(resSQL, intention, function (resError, resResult, resBody) {
+                    if (resError) {
+                      console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                      console.error(resError);
+                      res.end();
+                      return resError
+                    }  
+                    var delSQL = "DELETE FROM `tb_user_info` WHERE `user_id`=?"
+                    connection.query(delSQL, object.user_key, function (delError, delResult, delBody) {
+                      if (delError) {
+                        console.error("SERVER :: DB ERROR :: tb_user_info deletion error");
+                        console.error(delError);
+                        return delError
+                      }
 
-                    res.json({
-                      "type": resResult[0].response_type,
-                      "text": resResult[0].response_text,
-                      "object1": resResult[0].response_object1,
-                      "object2": resResult[0].response_object2,
+                      res.json({
+                        "type": resResult[0].response_type,
+                        "text": resResult[0].response_text,
+                        "object1": resResult[0].response_object1,
+                        "object2": resResult[0].response_object2,
+                      });
                     });
                   });
-                });
-                break;
+                  break;
 
-              case "Control_Engine_Start":
-                // 최초 진입
-                // 온도 확인
-                var temp = get_temperature(object.content);
-                console.log("SERVER :: Content : " + object.content + " :: Temperature : " + temp);
-                if (temp == "-1") {
-                  // 온도가 없음
+                case "Control_Engine_Start":
+                  // 최초 진입
+                  // 온도 확인
+                  var temp = get_temperature(object.content);
+                  console.log("SERVER :: Content : " + object.content + " :: Temperature : " + temp);
+                  if (temp == "-1") {
+                    // 온도가 없음
+                    var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
+                    connection.query(updateSQL, [intention, '4001', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
+                      if (updError) {
+                        console.error("SERVER :: DB ERROR :: tb_command update error");
+                        console.error(updError);
+                        res.end();
+                        return updError
+                      }
+                      var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
+                      connection.query(resSQL, [intention, "noTemp"], function (resError, resResult, resBody) {
+                        if (resError) {
+                          console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                          console.error(resError);
+                          res.end();
+                          return resError
+                        }
+
+                        res.json({
+                          "type": resResult[0].response_type,
+                          "text": resResult[0].response_text,
+                          "object1": resResult[0].response_object1,
+                          "object2": resResult[0].response_object2,
+                        });
+                      });
+                    });
+                  } else if (temp == "-237") {
+                    // 온도가 범위를 벗어남 
+                    var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
+                    connection.query(updateSQL, [intention, '4001', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
+                      if (updError) {
+                        console.error("SERVER :: DB ERROR :: tb_command update error");
+                        console.error(updError);
+                        res.end();
+                        return updError
+                      }
+                      var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
+                      connection.query(resSQL, [intention, "tempError"], function (resError, resResult, resBody) {
+                        if (resError) {
+                          console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                          console.error(resError);
+                          res.end();
+                          return resError
+                        }
+
+                        res.json({
+                          "type": resResult[0].response_type,
+                          "text": resResult[0].response_text,
+                          "object1": resResult[0].response_object1,
+                          "object2": resResult[0].response_object2,
+                        });
+                      });
+                    });
+                  } else {
+                    // 적정 온도 입력 됨 
+                    var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
+                    connection.query(updateSQL, [intention, '4002', object.content, temp, null, object.user_key], function (updError, updResult, updBody) {
+                      if (updError) {
+                        console.error("SERVER :: DB ERROR :: tb_command update error");
+                        console.error(updError);
+                        return updError
+                      }
+                      var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
+                      connection.query(resSQL, [intention, "temp"], function (resError, resResult, resBody) {
+                        if (resError) {
+                          console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                          console.error(resError);
+                          res.end();
+                          return resError
+                        }
+
+                        res.json({
+                          "type": resResult[0].response_type,
+                          "text": util.format(resResult[0].response_text, temp),
+                          "object1": resResult[0].response_object1,
+                          "object2": resResult[0].response_object2,
+                        });
+                      });
+                    });
+                  }
+                  break;
+
+                case "Control_Engine_Stop":
+                case "Control_Door_Close":
+                case "Control_Charge_Start":
+                case "Control_Charge_Stop":
+                case "Control_Horn_On":
+                case "Control_Light_On":
                   var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
-                  connection.query(updateSQL, [intention, '4001', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
+                  connection.query(updateSQL, [intention, '4002', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
                     if (updError) {
                       console.error("SERVER :: DB ERROR :: tb_command update error");
                       console.error(updError);
@@ -788,7 +895,7 @@ router.post('/message', function (req, res, next) {
                       return updError
                     }
                     var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
-                    connection.query(resSQL, [intention, "noTemp"], function (resError, resResult, resBody) {
+                    connection.query(resSQL, [intention, "start"], function (resError, resResult, resBody) {
                       if (resError) {
                         console.error("SERVER :: DB ERROR :: tb_response_text connection error");
                         console.error(resError);
@@ -804,8 +911,11 @@ router.post('/message', function (req, res, next) {
                       });
                     });
                   });
-                } else if (temp == "-237") {
-                  // 온도가 범위를 벗어남 
+                  break;
+
+                case "SmallTalk_Gloomy":
+                case "SmallTalk_Hungry":
+                case "SmallTalk_LetsPlay":
                   var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
                   connection.query(updateSQL, [intention, '4001', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
                     if (updError) {
@@ -815,7 +925,7 @@ router.post('/message', function (req, res, next) {
                       return updError
                     }
                     var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
-                    connection.query(resSQL, [intention, "tempError"], function (resError, resResult, resBody) {
+                    connection.query(resSQL, [intention, "enter"], function (resError, resResult, resBody) {
                       if (resError) {
                         console.error("SERVER :: DB ERROR :: tb_response_text connection error");
                         console.error(resError);
@@ -831,126 +941,9 @@ router.post('/message', function (req, res, next) {
                       });
                     });
                   });
-                } else {
-                  // 적정 온도 입력 됨 
-                  var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
-                  connection.query(updateSQL, [intention, '4002', object.content, temp, null, object.user_key], function (updError, updResult, updBody) {
-                    if (updError) {
-                      console.error("SERVER :: DB ERROR :: tb_command update error");
-                      console.error(updError);
-                      return updError
-                    }
-                    var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
-                    connection.query(resSQL, [intention, "temp"], function (resError, resResult, resBody) {
-                      if (resError) {
-                        console.error("SERVER :: DB ERROR :: tb_response_text connection error");
-                        console.error(resError);
-                        res.end();
-                        return resError
-                      }
+                  break;
 
-                      res.json({
-                        "type": resResult[0].response_type,
-                        "text": util.format(resResult[0].response_text, temp),
-                        "object1": resResult[0].response_object1,
-                        "object2": resResult[0].response_object2,
-                      });
-                    });
-                  });
-                }
-                break;
-
-              case "Control_Engine_Stop":
-              case "Control_Door_Close":
-              case "Control_Charge_Start":
-              case "Control_Charge_Stop":
-              case "Control_Horn_On":
-              case "Control_Light_On":
-                var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
-                connection.query(updateSQL, [intention, '4002', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
-                  if (updError) {
-                    console.error("SERVER :: DB ERROR :: tb_command update error");
-                    console.error(updError);
-                    res.end();
-                    return updError
-                  }
-                  var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
-                  connection.query(resSQL, [intention, "start"], function (resError, resResult, resBody) {
-                    if (resError) {
-                      console.error("SERVER :: DB ERROR :: tb_response_text connection error");
-                      console.error(resError);
-                      res.end();
-                      return resError
-                    }
-
-                    res.json({
-                      "type": resResult[0].response_type,
-                      "text": resResult[0].response_text,
-                      "object1": resResult[0].response_object1,
-                      "object2": resResult[0].response_object2,
-                    });
-                  });
-                });
-                break;
-
-              case "SmallTalk_Gloomy":
-              case "SmallTalk_Hungry":
-              case "SmallTalk_LetsPlay":
-                var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
-                connection.query(updateSQL, [intention, '4001', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
-                  if (updError) {
-                    console.error("SERVER :: DB ERROR :: tb_command update error");
-                    console.error(updError);
-                    res.end();
-                    return updError
-                  }
-                  var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
-                  connection.query(resSQL, [intention, "enter"], function (resError, resResult, resBody) {
-                    if (resError) {
-                      console.error("SERVER :: DB ERROR :: tb_response_text connection error");
-                      console.error(resError);
-                      res.end();
-                      return resError
-                    }
-
-                    res.json({
-                      "type": resResult[0].response_type,
-                      "text": resResult[0].response_text,
-                      "object1": resResult[0].response_object1,
-                      "object2": resResult[0].response_object2,
-                    });
-                  });
-                });
-                break;
-
-              case "SmallTalk_Emoticon":
-                var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
-                connection.query(updateSQL, [null, '200', null, null, null, object.user_key], function (updError, updResult, updBody) {
-                  if (updError) {
-                    console.error("SERVER :: DB ERROR :: tb_command update error");
-                    console.error(updError);
-                    res.end();
-                    return updError
-                  }
-
-                  res.json({
-                    "type": "simpleText",
-                    "text": object.content
-                  });
-                });
-
-                break;
-
-              default:
-                var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ?"
-                connection.query(resSQL, intention, function (resError, resResult, body) {
-                  if (resError) {
-                    console.error("SERVER :: DB ERROR :: tb_response_text connection error");
-                    console.error(resError);
-                    res.end();
-                    return resError
-                  }
-
+                case "SmallTalk_Emoticon":
                   var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
                   connection.query(updateSQL, [null, '200', null, null, null, object.user_key], function (updError, updResult, updBody) {
                     if (updError) {
@@ -961,61 +954,61 @@ router.post('/message', function (req, res, next) {
                     }
 
                     res.json({
-                      "type": resResult[0].response_type,
-                      "text": resResult[0].response_text,
-                      "object1": resResult[0].response_object1,
-                      "object2": resResult[0].response_object2,
+                      "type": "simpleText",
+                      "text": object.content
                     });
                   });
-                });
-                break;
-            }
-          } else {
-            // 최초 진입이 아닌 경우 
-            // 즉, 어떤 시나리오에 무조건 포함되어 있는 경우에만 이 쪽으로 들어올 수 있음 
-            // 시나리오에 포함이 되어 있다면, 여기서 처리할 정보들은 NLU 결과와 전혀 관계가 없음 
-            // 따라서 변수 intention 은 무시함 
-            // 여기서 intention은 ctlCommand 임 
 
-            // 가장 먼저 이 전에 입력한 제어 명령이 수행 중일 수가 있음 
-            // 이 때는 계속 진행 여부를 물어보는 것이 좋을 것으로 생각함 
-            // 확인은 DB를 통해서 가능함 comResult.status
-            if (comResult[0].status == "8000") { // 이전에 입력한 명령이 실행 중일 때
-              if (intention.indexOf("Control") >= 0) { // 제어 명령이 실행 중일 때, 다시 제어 명령이 들어온 경우
-                var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ? AND `chatbot_status` = ?";
-                connection.query(resSQL, ["Error", "8000"], function (resError, resResult, resBody) {
-                  if (resError) {
-                    console.error("SERVER :: DB ERROR :: tb_response_text connection error");
-                    console.error(resError);
-                    res.end();
-                    return resError
-                  }
+                  break;
 
-                  res.json({
-                    "type": resResult[0].response_type,
-                    "text": resResult[0].response_text,
-                    "object1": resResult[0].response_object1,
-                    "object2": resResult[0].response_object2,
-                  });
-                });
-              } else { // 제어 명령이 실행 중일 때, 제어가 아닌 다른 명령이 들어온 경우
-                var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ?";
-                connection.query(resSQL, "Initialize", function (resError, resResult, resBody) {
-                  if (resError) {
-                    console.error("SERVER :: DB ERROR :: tb_response_text connection error");
-                    console.error(resError);
-                    res.end();
-                    return resError
-                  }
-
-                  // 결과 출력이므로, DB 초기화가 필요 
-                  var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
-                  connection.query(updateSQL, [null, '200', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
-                    if (updError) {
-                      console.error("SERVER :: DB ERROR :: tb_command update error");
-                      console.error(updError);
+                default:
+                  var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ?"
+                  connection.query(resSQL, intention, function (resError, resResult, body) {
+                    if (resError) {
+                      console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                      console.error(resError);
                       res.end();
-                      return updError
+                      return resError
+                    }
+
+                    var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
+                    connection.query(updateSQL, [null, '200', null, null, null, object.user_key], function (updError, updResult, updBody) {
+                      if (updError) {
+                        console.error("SERVER :: DB ERROR :: tb_command update error");
+                        console.error(updError);
+                        res.end();
+                        return updError
+                      }
+
+                      res.json({
+                        "type": resResult[0].response_type,
+                        "text": resResult[0].response_text,
+                        "object1": resResult[0].response_object1,
+                        "object2": resResult[0].response_object2,
+                      });
+                    });
+                  });
+                  break;
+              }
+            } else {
+              // 최초 진입이 아닌 경우 
+              // 즉, 어떤 시나리오에 무조건 포함되어 있는 경우에만 이 쪽으로 들어올 수 있음 
+              // 시나리오에 포함이 되어 있다면, 여기서 처리할 정보들은 NLU 결과와 전혀 관계가 없음 
+              // 따라서 변수 intention 은 무시함 
+              // 여기서 intention은 ctlCommand 임 
+
+              // 가장 먼저 이 전에 입력한 제어 명령이 수행 중일 수가 있음 
+              // 이 때는 계속 진행 여부를 물어보는 것이 좋을 것으로 생각함 
+              // 확인은 DB를 통해서 가능함 comResult.status
+              if (comResult[0].status == "8000") { // 이전에 입력한 명령이 실행 중일 때
+                if (intention.indexOf("Control") >= 0) { // 제어 명령이 실행 중일 때, 다시 제어 명령이 들어온 경우
+                  var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ? AND `chatbot_status` = ?";
+                  connection.query(resSQL, ["Error", "8000"], function (resError, resResult, resBody) {
+                    if (resError) {
+                      console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                      console.error(resError);
+                      res.end();
+                      return resError
                     }
 
                     res.json({
@@ -1024,26 +1017,189 @@ router.post('/message', function (req, res, next) {
                       "object1": resResult[0].response_object1,
                       "object2": resResult[0].response_object2,
                     });
-                  });                
-                });
-              }
-            } else { // 수행 중인 제어 명령이 없는 경우 
-              // 먼저 Pin 입력을 골라냄 
-              if (intention == "PIN") {
-                var state = object.user_key; // 블루링크 전송용 정보
-                var insert_pin = object.content; // 사용자 입력 pin
+                  });
+                } else { // 제어 명령이 실행 중일 때, 제어가 아닌 다른 명령이 들어온 경우
+                  var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ?";
+                  connection.query(resSQL, "Initialize", function (resError, resResult, resBody) {
+                    if (resError) {
+                      console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                      console.error(resError);
+                      res.end();
+                      return resError
+                    }
 
-                var uuid_state = state + "&" + uuid.v1();
-                console.log("uuid_state : " + uuid_state);
+                    // 결과 출력이므로, DB 초기화가 필요 
+                    var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
+                    connection.query(updateSQL, [null, '200', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
+                      if (updError) {
+                        console.error("SERVER :: DB ERROR :: tb_command update error");
+                        console.error(updError);
+                        res.end();
+                        return updError
+                      }
 
-                console.log("state : " + state);
-                console.log("inserted pin : " + insert_pin);
+                      res.json({
+                        "type": resResult[0].response_type,
+                        "text": resResult[0].response_text,
+                        "object1": resResult[0].response_object1,
+                        "object2": resResult[0].response_object2,
+                      });
+                    });                
+                  });
+                }
+              } else { // 수행 중인 제어 명령이 없는 경우 
+                // 먼저 Pin 입력을 골라냄 
+                if (intention == "PIN") {
+                  var state = object.user_key; // 블루링크 전송용 정보
+                  var insert_pin = object.content; // 사용자 입력 pin
 
-                if (insert_pin == saved_pin) {
-                  // 이전에 실행 중인 작업이 끝나지 않은 경우
-                  if (comResult[0].status == "8000") {
+                  var uuid_state = state + "&" + uuid.v1();
+                  console.log("uuid_state : " + uuid_state);
+
+                  console.log("state : " + state);
+                  console.log("inserted pin : " + insert_pin);
+
+                  if (insert_pin == saved_pin) {
+                    // 이전에 실행 중인 작업이 끝나지 않은 경우
+                    if (comResult[0].status == "8000") {
+                      var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ? AND `chatbot_status` = ?"
+                      connection.query(resSQL, ["Error", "8000"], function (resError, resResult, body) {
+                        if (resError) {
+                          console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                          console.error(resError);
+                          res.end();
+                          return resError
+                        }
+
+                        res.json({
+                          "type": resResult[0].response_type,
+                          "text": resResult[0].response_text,
+                          "object1": resResult[0].response_object1,
+                          "object2": resResult[0].response_object2,
+                        });
+                      });
+                    }
+
+                    // 앞선 에러가 없을 경우, 
+                    // 블루링크 연결 
+                    console.log("access_teken : " + access_token);
+                    var headers = headersForm(access_token);
+                    var form;
+
+                    if (ctlCommand == "Control_Engine_Start") {
+                      form = engineStartForm(saved_pin, uuid_state, temperature);
+                    } else if (ctlCommand == "Control_Engine_Stop") {
+                      form = engineStopForm(saved_pin, uuid_state);
+                    } else if (ctlCommand == "Control_Close_Door") {
+                      form = closeDoorForm(saved_pin, uuid_state);
+                    } else if (ctlCommand == "Control_Light_Control" || ctlCommand == "Control_Horn_Control") {
+                      form = emergencyFlashingHornForm(saved_pin, uuid_state);
+                    } else if (ctlCommand == "Control_Charge_Start") {
+                      form = chargeOnForm(saved_pin, uuid_state);
+                    } else if (ctlCommand == "Control_Charge_Stop") {
+                      form = chargeOffForm(saved_pin, uuid_state);
+                    }
+
+                    formData = JSON.stringify(form);
+                    //Post 요청을 위해 데이터를 JSON 형식으로 변환하여 body에 포함
+
+                    var options = {
+                      'url': commandURL(ctlCommand, vehicleId),
+                      'method': 'POST',
+                      'headers': headers,
+                      'body': formData,
+                    }
+
+                    console.log(options);
+
+                    // Start the request
+                    request(options, function (hmcError, hmcResponse, hmcBody) {
+                      if (hmcError) {
+                        console.error("SERVER :: Request for HMC server ERROR!");
+                        console.error(hmcError);
+                        res.end();
+                        return hmcError
+                      }
+                      else {
+                        console.log("SERVER :: Requesting for HMC");
+                        console.log("SERVER :: Body ::::::::");
+                        console.log(hmcBody);
+                        var obj = JSON.parse(hmcBody);
+
+                        if (obj.errMsg) {
+                          /***************************************************
+                          현대 API Server로 이미 명령을 전송 한 상태일 때
+                          한번 더 명령 수행 요청 시 API 서버에서 명령 수행 중 or 
+                          명령 중복 Message를 전송할 때 걸리는 조건.
+                          ***************************************************/
+                          console.log("SERVER :: HMC server error message :: " + obj.errMsg + " ("+ obj.errCode + ")");
+                          console.log("SERVER :: " + ctlCommand + " Command waiting : " + vehicleId);
+
+                          var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ? AND `chatbot_status` = ?"
+                          connection.query(resSQL, ["Error", obj.errCode], function (resError, resResult, resBody) {
+                            if (resError) {
+                              console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                              console.error(resError);
+                              res.end();
+                              return resError
+                            }
+
+                            res.json({
+                              "type": resResult[0].response_type,
+                              "text": resResult[0].response_text,
+                              "object1": resResult[0].response_object1,
+                              "object2": resResult[0].response_object2,
+                            });
+                          });
+                        } else {
+                          /***************************************************
+                          챗봇 서버에서 현대 API Server로 명령 전달 후
+                          수행 결과 도착 시 챗봇 서버와 소켓 연결 된
+                          로그 클라이언트로 로그 내용 전송
+                          ***************************************************/
+                          console.log("SERVER :: Pin Correct : HMC Response correct: " + insert_pin);
+
+                          var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
+                          connection.query(updateSQL, [ctlCommand, '8000', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
+                            if (updError) {
+                              console.error("SERVER :: DB ERROR :: tb_command update error");
+                              console.error(updError);
+                              res.end();
+                              return updError
+                            }
+
+                            console.log("SERVER :: HMC Requested : " + ctlCommand);
+
+                            var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ? AND `chatbot_status` = ?"
+                            connection.query(resSQL, [ctlCommand, "end"], function (resError, resResult, resBody) {
+                              if (resError) {
+                                console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                                console.error(resError);
+                                res.end();
+                                return resError
+                              }
+
+                              if (ctlCommand == "Control_Engine_Start") {
+                                var message = util.format(resResult[0].response_text, temperature);
+                              } else {
+                                var message = resResult[0].response_text;
+                              }
+
+                              res.json({
+                                "type": resResult[0].response_type,
+                                "text": message,
+                                "object1": resResult[0].response_object1,
+                                "object2": resResult[0].response_object2,
+                              });
+                            });
+                          });
+                        }
+                      }
+                    });
+                  } else {
+                    // Pin 이 일치하지 않는 경우 
                     var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ? AND `chatbot_status` = ?"
-                    connection.query(resSQL, ["Error", "8000"], function (resError, resResult, body) {
+                    connection.query(resSQL, ["Error", "4003"], function (resError, resResult, resBody) {
                       if (resError) {
                         console.error("SERVER :: DB ERROR :: tb_response_text connection error");
                         console.error(resError);
@@ -1059,218 +1215,63 @@ router.post('/message', function (req, res, next) {
                       });
                     });
                   }
-
-                  // 앞선 에러가 없을 경우, 
-                  // 블루링크 연결 
-                  console.log("access_teken : " + access_token);
-                  var headers = headersForm(access_token);
-                  var form;
-
-                  if (ctlCommand == "Control_Engine_Start") {
-                    form = engineStartForm(saved_pin, uuid_state, temperature);
-                  } else if (ctlCommand == "Control_Engine_Stop") {
-                    form = engineStopForm(saved_pin, uuid_state);
-                  } else if (ctlCommand == "Control_Close_Door") {
-                    form = closeDoorForm(saved_pin, uuid_state);
-                  } else if (ctlCommand == "Control_Light_Control" || ctlCommand == "Control_Horn_Control") {
-                    form = emergencyFlashingHornForm(saved_pin, uuid_state);
-                  } else if (ctlCommand == "Control_Charge_Start") {
-                    form = chargeOnForm(saved_pin, uuid_state);
-                  } else if (ctlCommand == "Control_Charge_Stop") {
-                    form = chargeOffForm(saved_pin, uuid_state);
-                  }
-
-                  formData = JSON.stringify(form);
-                  //Post 요청을 위해 데이터를 JSON 형식으로 변환하여 body에 포함
-
-                  var options = {
-                    'url': commandURL(ctlCommand, vehicleId),
-                    'method': 'POST',
-                    'headers': headers,
-                    'body': formData,
-                  }
-
-                  console.log(options);
-
-                  // Start the request
-                  request(options, function (hmcError, hmcResponse, hmcBody) {
-                    if (hmcError) {
-                      console.error("SERVER :: Request for HMC server ERROR!");
-                      console.error(hmcError);
+                } else if (intention == "Food") {
+                  // 맛집이 발화로 입력된 경우임 
+                  // 해당 맛집 정보를 출력해야함 
+                  var foodSQL = "SELECT * FROM `tb_food_list` WHERE `name` = ?"
+                  connection.query(foodSQL, object.content, function (foodError, foodResult, foodBody) {
+                    if (foodError) {
+                      console.error("SERVER :: DB ERROR : tb_food_list connection error");
+                      console.error(foodError);
                       res.end();
-                      return hmcError
+                      return foodError
                     }
-                    else {
-                      console.log("SERVER :: Requesting for HMC");
-                      console.log("SERVER :: Body ::::::::");
-                      console.log(hmcBody);
-                      var obj = JSON.parse(hmcBody);
 
-                      if (obj.errMsg) {
-                        /***************************************************
-                        현대 API Server로 이미 명령을 전송 한 상태일 때
-                        한번 더 명령 수행 요청 시 API 서버에서 명령 수행 중 or 
-                        명령 중복 Message를 전송할 때 걸리는 조건.
-                        ***************************************************/
-                        console.log("SERVER :: HMC server error message :: " + obj.errMsg + " ("+ obj.errCode + ")");
-                        console.log("SERVER :: " + ctlCommand + " Command waiting : " + vehicleId);
-
-                        var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ? AND `chatbot_status` = ?"
-                        connection.query(resSQL, ["Error", obj.errCode], function (resError, resResult, resBody) {
-                          if (resError) {
-                            console.error("SERVER :: DB ERROR :: tb_response_text connection error");
-                            console.error(resError);
-                            res.end();
-                            return resError
-                          }
-
-                          res.json({
-                            "type": resResult[0].response_type,
-                            "text": resResult[0].response_text,
-                            "object1": resResult[0].response_object1,
-                            "object2": resResult[0].response_object2,
-                          });
-                        });
-                      } else {
-                        /***************************************************
-                        챗봇 서버에서 현대 API Server로 명령 전달 후
-                        수행 결과 도착 시 챗봇 서버와 소켓 연결 된
-                        로그 클라이언트로 로그 내용 전송
-                        ***************************************************/
-                        console.log("SERVER :: Pin Correct : HMC Response correct: " + insert_pin);
-
-                        var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
-                        connection.query(updateSQL, [ctlCommand, '8000', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
-                          if (updError) {
-                            console.error("SERVER :: DB ERROR :: tb_command update error");
-                            console.error(updError);
-                            res.end();
-                            return updError
-                          }
-
-                          console.log("SERVER :: HMC Requested : " + ctlCommand);
-
-                          var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ? AND `chatbot_status` = ?"
-                          connection.query(resSQL, [ctlCommand, "end"], function (resError, resResult, resBody) {
-                            if (resError) {
-                              console.error("SERVER :: DB ERROR :: tb_response_text connection error");
-                              console.error(resError);
-                              res.end();
-                              return resError
-                            }
-
-                            if (ctlCommand == "Control_Engine_Start") {
-                              var message = util.format(resResult[0].response_text, temperature);
-                            } else {
-                              var message = resResult[0].response_text;
-                            }
-
-                            res.json({
-                              "type": resResult[0].response_type,
-                              "text": message,
-                              "object1": resResult[0].response_object1,
-                              "object2": resResult[0].response_object2,
-                            });
-                          });
-                        });
+                    // 결과 출력이므로, DB 초기화가 필요 
+                    var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
+                    connection.query(updateSQL, [null, '200', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
+                      if (updError) {
+                        console.error("SERVER :: DB ERROR :: tb_command update error");
+                        console.error(updError);
+                        res.end();
+                        return updError
                       }
-                    }
-                  });
-                } else {
-                  // Pin 이 일치하지 않는 경우 
-                  var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ? AND `chatbot_status` = ?"
-                  connection.query(resSQL, ["Error", "4003"], function (resError, resResult, resBody) {
-                    if (resError) {
-                      console.error("SERVER :: DB ERROR :: tb_response_text connection error");
-                      console.error(resError);
-                      res.end();
-                      return resError
-                    }
 
-                    res.json({
-                      "type": resResult[0].response_type,
-                      "text": resResult[0].response_text,
-                      "object1": resResult[0].response_object1,
-                      "object2": resResult[0].response_object2,
+                      res.json({
+                        "type": "image",
+                        "object1": foodResult[0].jpg,
+                      });
                     });
                   });
-                }
-              } else if (intention == "Food") {
-                // 맛집이 발화로 입력된 경우임 
-                // 해당 맛집 정보를 출력해야함 
-                var foodSQL = "SELECT * FROM `tb_food_list` WHERE `name` = ?"
-                connection.query(foodSQL, object.content, function (foodError, foodResult, foodBody) {
-                  if (foodError) {
-                    console.error("SERVER :: DB ERROR : tb_food_list connection error");
-                    console.error(foodError);
-                    res.end();
-                    return foodError
-                  }
-
-                  // 결과 출력이므로, DB 초기화가 필요 
-                  var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
-                  connection.query(updateSQL, [null, '200', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
-                    if (updError) {
-                      console.error("SERVER :: DB ERROR :: tb_command update error");
-                      console.error(updError);
+                } else if (intention == "Location") {
+                  // 여행지가 발화로 입력된 경우임 
+                  // 해당 야헹지 정보를 출력해야함 
+                  var tourSQL = "SELECT * FROM `tb_tour_list` WHERE `name` = ?"
+                  connection.query(tourSQL, object.content, function (tourError, tourResult, tourBody) {
+                    if (tourError) {
+                      console.error("SERVER :: DB ERROR : tb_tour_list connection error");
+                      console.error(tourError);
                       res.end();
-                      return updError
+                      return tourError
                     }
 
-                    res.json({
-                      "type": "image",
-                      "object1": foodResult[0].jpg,
+                    // 결과 출력이므로, DB 초기화가 필요 
+                    var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
+                    connection.query(updateSQL, [null, '200', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
+                      if (updError) {
+                        console.error("SERVER :: DB ERROR :: tb_command update error");
+                        console.error(updError);
+                        res.end();
+                        return updError
+                      }
+
+                      res.json({
+                        "type": "image",
+                        "object1": tourResult[0].jpg,
+                      });
                     });
                   });
-                });
-              } else if (intention == "Location") {
-                // 여행지가 발화로 입력된 경우임 
-                // 해당 야헹지 정보를 출력해야함 
-                var tourSQL = "SELECT * FROM `tb_tour_list` WHERE `name` = ?"
-                connection.query(tourSQL, object.content, function (tourError, tourResult, tourBody) {
-                  if (tourError) {
-                    console.error("SERVER :: DB ERROR : tb_tour_list connection error");
-                    console.error(tourError);
-                    res.end();
-                    return tourError
-                  }
-
-                  // 결과 출력이므로, DB 초기화가 필요 
-                  var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
-                  connection.query(updateSQL, [null, '200', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
-                    if (updError) {
-                      console.error("SERVER :: DB ERROR :: tb_command update error");
-                      console.error(updError);
-                      res.end();
-                      return updError
-                    }
-
-                    res.json({
-                      "type": "image",
-                      "object1": tourResult[0].jpg,
-                    });
-                  });
-                });
-              } else if (intention == "Buttons") {
-                if (object.content == "제어 결과 확인") { // 제어 결과 확인 버튼 
-                  // DB 를 업데이트할 필요는 없음 
-                  var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
-                  connection.query(resSQL, ["Error", comResult[0].status], function (resError, resResult, resBody) {
-                    if (resError) {
-                      console.error("SERVER :: DB ERROR :: tb_response_text connection error");
-                      console.error(resError);
-                      res.end();
-                      return resError
-                    }
-
-                    res.json({
-                      "type": resResult[0].response_type,
-                      "text": resResult[0].response_text,
-                      "object1": resResult[0].response_object1,
-                      "object2": resResult[0].response_object2,
-                    });
-                  });
-                } else {
+                } else if (intention == "Buttons") {
                   // SmallTalk 시나리오에서 No 버튼을 누른 경우
                   var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
                   connection.query(resSQL, ["Button", object.content], function (resError, resResult, resBody) {
@@ -1299,48 +1300,102 @@ router.post('/message', function (req, res, next) {
                       });
                     });
                   });
-                }
-              } else {
-                // 제대로 입력 됐다면 온도
-                // 아니라면, 시나리오 중에 잘못 입력됨
+                } else {
+                  // 제대로 입력 됐다면 온도
+                  // 아니라면, 시나리오 중에 잘못 입력됨
 
-                // 맛집 시나리오에서 Yes를 누른 경우
-                if (ctlCommand == "SmallTalk_Hungry" || ctlCommand == "SmallTalk_Gloomy") {
-                  var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
-                  connection.query(resSQL, [ctlCommand, "yes"], function (resError, resResult, resBody) {
-                    if (resError) {
-                      console.error("SERVER :: DB ERROR :: tb_response_text connection error");
-                      console.error(resError);
-                      res.end();
-                      return resError
-                    }
-
-                    var dbSQL = resResult[0].response_object1;
-                    connection.query(dbSQL, function (dbError, dbResult, dbBody) {
-                      var items = [];
-                      for (var i = 0; i < dbResult.length; i++) {
-                        items.push({
-                          "title": dbResult[i].name,
-                          "description": dbResult[i].area,
-                          "imageUrl": dbResult[i].jpg,
-                          "homepage": dbResult[i].url,
-                        });
+                  // 맛집 시나리오에서 Yes를 누른 경우
+                  if (ctlCommand == "SmallTalk_Hungry" || ctlCommand == "SmallTalk_Gloomy") {
+                    var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
+                    connection.query(resSQL, [ctlCommand, "yes"], function (resError, resResult, resBody) {
+                      if (resError) {
+                        console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                        console.error(resError);
+                        res.end();
+                        return resError
                       }
 
-                      res.json({
-                        "type": resResult[0].response_type,
-                        "text": resResult[0].response_text,
-                        "object1": items,
+                      var dbSQL = resResult[0].response_object1;
+                      connection.query(dbSQL, function (dbError, dbResult, dbBody) {
+                        var items = [];
+                        for (var i = 0; i < dbResult.length; i++) {
+                          items.push({
+                            "title": dbResult[i].name,
+                            "description": dbResult[i].area,
+                            "imageUrl": dbResult[i].jpg,
+                            "homepage": dbResult[i].url,
+                          });
+                        }
+
+                        res.json({
+                          "type": resResult[0].response_type,
+                          "text": resResult[0].response_text,
+                          "object1": items,
+                        });
                       });
                     });
-                  });
-                } else {
-                  // 온도 확인
-                  var temp = get_temperature(object.content);
-                  //console.log("SERVER :: temp : " + temp);
-                  if (temp == "-1") { // 온도가 발화 안에 없음 
-                    // 현재 시나리오가 시동 걸기일 경우와 아닌 경우가 있음 
-                    if (ctlCommand == "Control_Engine_Start") { // 현재 시나리오가 시동 걸기일 경우 
+                  } else {
+                    // 온도 확인
+                    var temp = get_temperature(object.content);
+                    //console.log("SERVER :: temp : " + temp);
+                    if (temp == "-1") { // 온도가 발화 안에 없음 
+                      // 현재 시나리오가 시동 걸기일 경우와 아닌 경우가 있음 
+                      if (ctlCommand == "Control_Engine_Start") { // 현재 시나리오가 시동 걸기일 경우 
+                        var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
+                        connection.query(updateSQL, [intention, '4001', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
+                          if (updError) {
+                            console.error("SERVER :: DB ERROR :: tb_command update error");
+                            console.error(updError);
+                            res.end();
+                            return updError
+                          }
+
+                          var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
+                          connection.query(resSQL, [intention, "noTemp"], function (resError, resResult, resBody) {
+                            if (resError) {
+                              console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                              console.error(resError);
+                              res.end();
+                              return resError
+                            }
+
+                            res.json({
+                              "type": resResult[0].response_type,
+                              "text": resResult[0].response_text,
+                              "object1": resResult[0].response_object1,
+                              "object2": resResult[0].response_object2,
+                            });
+                          });
+                        });        
+                      } else { // 현재 시나리오가 시동 걸기가 아닌 경우 
+                        var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=?";
+                        connection.query(resSQL, "Fail", function (resError, resResult, resBody) {
+                          if (resError) {
+                            console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                            console.error(resError);
+                            res.end();
+                            return resError
+                          }
+
+                          var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
+                          connection.query(updateSQL, [null, '200', null, null, null, object.user_key], function (updError, updResult, updBody) {
+                            if (updError) {
+                              console.error("SERVER :: DB ERROR :: tb_command update error");
+                              console.error(updError);
+                              res.end();
+                              return updError
+                            }
+
+                            res.json({
+                              "type": resResult[0].response_type,
+                              "text": resResult[0].response_text,
+                              "object1": resResult[0].response_object1,
+                              "object2": resResult[0].response_object2,
+                            });
+                          });
+                        });
+                      }
+                    } else if (temp == "-237") { // 온도가 범위를 벗어남 
                       var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
                       connection.query(updateSQL, [intention, '4001', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
                         if (updError) {
@@ -1349,9 +1404,8 @@ router.post('/message', function (req, res, next) {
                           res.end();
                           return updError
                         }
-
                         var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
-                        connection.query(resSQL, [intention, "noTemp"], function (resError, resResult, resBody) {
+                        connection.query(resSQL, [intention, "tempError"], function (resError, resResult, resBody) {
                           if (resError) {
                             console.error("SERVER :: DB ERROR :: tb_response_text connection error");
                             console.error(resError);
@@ -1366,93 +1420,40 @@ router.post('/message', function (req, res, next) {
                             "object2": resResult[0].response_object2,
                           });
                         });
-                      });        
-                    } else { // 현재 시나리오가 시동 걸기가 아닌 경우 
-                      var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=?";
-                      connection.query(resSQL, "Fail", function (resError, resResult, resBody) {
-                        if (resError) {
-                          console.error("SERVER :: DB ERROR :: tb_response_text connection error");
-                          console.error(resError);
+                      });
+                    } else { // 적정 온도 입력 됨
+                      var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
+                      connection.query(updateSQL, [ctlCommand, '4002', object.content, temp, null, object.user_key], function (updError, updResult, updBody) {
+                        if (updError) {
+                          console.error("SERVER :: DB ERROR :: tb_command update error");
+                          console.error(updError);
                           res.end();
-                          return resError
+                          return updError
                         }
-
-                        var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
-                        connection.query(updateSQL, [null, '200', null, null, null, object.user_key], function (updError, updResult, updBody) {
-                          if (updError) {
-                            console.error("SERVER :: DB ERROR :: tb_command update error");
-                            console.error(updError);
+                        var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
+                        connection.query(resSQL, [ctlCommand, "temp"], function (resError, resResult, resBody) {
+                          if (resError) {
+                            console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                            console.error(resError);
                             res.end();
-                            return updError
+                            return resError
+                          }
+
+                          if (ctlCommand == "Control_Engine_Start") {
+                            var message = util.format(resResult[0].response_text, get_temperature(object.content));
+                          } else {
+                            var message = resResult[0].response_text;
                           }
 
                           res.json({
                             "type": resResult[0].response_type,
-                            "text": resResult[0].response_text,
+                            "text": message,
                             "object1": resResult[0].response_object1,
                             "object2": resResult[0].response_object2,
                           });
                         });
                       });
                     }
-                  } else if (temp == "-237") { // 온도가 범위를 벗어남 
-                    var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
-                    connection.query(updateSQL, [intention, '4001', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
-                      if (updError) {
-                        console.error("SERVER :: DB ERROR :: tb_command update error");
-                        console.error(updError);
-                        res.end();
-                        return updError
-                      }
-                      var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
-                      connection.query(resSQL, [intention, "tempError"], function (resError, resResult, resBody) {
-                        if (resError) {
-                          console.error("SERVER :: DB ERROR :: tb_response_text connection error");
-                          console.error(resError);
-                          res.end();
-                          return resError
-                        }
-
-                        res.json({
-                          "type": resResult[0].response_type,
-                          "text": resResult[0].response_text,
-                          "object1": resResult[0].response_object1,
-                          "object2": resResult[0].response_object2,
-                        });
-                      });
-                    });
-                  } else { // 적정 온도 입력 됨
-                    var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
-                    connection.query(updateSQL, [ctlCommand, '4002', object.content, temp, null, object.user_key], function (updError, updResult, updBody) {
-                      if (updError) {
-                        console.error("SERVER :: DB ERROR :: tb_command update error");
-                        console.error(updError);
-                        res.end();
-                        return updError
-                      }
-                      var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
-                      connection.query(resSQL, [ctlCommand, "temp"], function (resError, resResult, resBody) {
-                        if (resError) {
-                          console.error("SERVER :: DB ERROR :: tb_response_text connection error");
-                          console.error(resError);
-                          res.end();
-                          return resError
-                        }
-
-                        if (ctlCommand == "Control_Engine_Start") {
-                          var message = util.format(resResult[0].response_text, get_temperature(object.content));
-                        } else {
-                          var message = resResult[0].response_text;
-                        }
-
-                        res.json({
-                          "type": resResult[0].response_type,
-                          "text": message,
-                          "object1": resResult[0].response_object1,
-                          "object2": resResult[0].response_object2,
-                        });
-                      });
-                    });
                   }
                 }
               }
