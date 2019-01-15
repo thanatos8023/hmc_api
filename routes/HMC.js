@@ -1252,24 +1252,15 @@ router.post('/message', function (req, res, next) {
                   });
                 });
               } else if (intention == "Buttons") {
-                // SmallTalk 시나리오에서 No 버튼을 누른 경우
-                var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
-                connection.query(resSQL, ["Button", object.content], function (resError, resResult, resBody) {
-                  if (resError) {
-                    console.error("SERVER :: DB ERROR :: tb_response_text connection error");
-                    console.error(resError);
-                    res.end();
-                    return resError
-                  }
-
-                  // 결과 출력이므로, DB 초기화가 필요 
-                  var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
-                  connection.query(updateSQL, [null, '200', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
-                    if (updError) {
-                      console.error("SERVER :: DB ERROR :: tb_command update error");
-                      console.error(updError);
+                if (object.content == "제어 결과 확인") { // 제어 결과 확인 버튼 
+                  // DB 를 업데이트할 필요는 없음 
+                  var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
+                  connection.query(resSQL, ["Error", comResult[0].status], function (resError, resResult, resBody) {
+                    if (resError) {
+                      console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                      console.error(resError);
                       res.end();
-                      return updError
+                      return resError
                     }
 
                     res.json({
@@ -1279,7 +1270,36 @@ router.post('/message', function (req, res, next) {
                       "object2": resResult[0].response_object2,
                     });
                   });
-                });
+                } else {
+                  // SmallTalk 시나리오에서 No 버튼을 누른 경우
+                  var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
+                  connection.query(resSQL, ["Button", object.content], function (resError, resResult, resBody) {
+                    if (resError) {
+                      console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                      console.error(resError);
+                      res.end();
+                      return resError
+                    }
+
+                    // 결과 출력이므로, DB 초기화가 필요 
+                    var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
+                    connection.query(updateSQL, [null, '200', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
+                      if (updError) {
+                        console.error("SERVER :: DB ERROR :: tb_command update error");
+                        console.error(updError);
+                        res.end();
+                        return updError
+                      }
+
+                      res.json({
+                        "type": resResult[0].response_type,
+                        "text": resResult[0].response_text,
+                        "object1": resResult[0].response_object1,
+                        "object2": resResult[0].response_object2,
+                      });
+                    });
+                  });
+                }
               } else {
                 // 제대로 입력 됐다면 온도
                 // 아니라면, 시나리오 중에 잘못 입력됨
