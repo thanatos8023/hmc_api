@@ -1134,7 +1134,7 @@ router.post('/message', function (req, res, next) {
                             console.log("SERVER :: " + ctlCommand + " Command waiting : " + vehicleId);
 
                             var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ? AND `chatbot_status` = ?"
-                            connection.query(resSQL, [intention, obj.errCode], function (resError, resResult, resBody) {
+                            connection.query(resSQL, ["Error", obj.errCode], function (resError, resResult, resBody) {
                               if (resError) {
                                 console.error("SERVER :: DB ERROR :: tb_response_text connection error");
                                 console.error(resError);
