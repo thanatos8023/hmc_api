@@ -224,7 +224,7 @@ function commandURL(command, vehicleId) {
 
   if (command == "Control_Engine_Start" || command == "Control_Engine_Stop") {
     str = str + '/control/engine'
-  } else if (command == "Control_Close_Door") {
+  } else if (command == "Control_Door_Close") {
     str = str + '/control/door'
   } else if (command == "Control_Light_On") {
     str = str + '/control/light'
@@ -887,7 +887,7 @@ router.post('/message', function (req, res, next) {
                 case "Control_Horn_On":
                 case "Control_Light_On":
                   var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
-                  connection.query(updateSQL, [intention, '4002', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
+                  connection.query(updateSQL, [intention, '7000', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
                     if (updError) {
                       console.error("SERVER :: DB ERROR :: tb_command update error");
                       console.error(updError);
@@ -1078,100 +1078,63 @@ router.post('/message', function (req, res, next) {
                           "object2": resResult[0].response_object2,
                         });
                       });
-                    }
+                    } else {
+                      // 앞선 에러가 없을 경우, 
+                      // 블루링크 연결 
+                      console.log("access_teken : " + access_token);
+                      var headers = headersForm(access_token);
+                      var form;
 
-                    // 앞선 에러가 없을 경우, 
-                    // 블루링크 연결 
-                    console.log("access_teken : " + access_token);
-                    var headers = headersForm(access_token);
-                    var form;
-
-                    if (ctlCommand == "Control_Engine_Start") {
-                      form = engineStartForm(saved_pin, uuid_state, temperature);
-                    } else if (ctlCommand == "Control_Engine_Stop") {
-                      form = engineStopForm(saved_pin, uuid_state);
-                    } else if (ctlCommand == "Control_Close_Door") {
-                      form = closeDoorForm(saved_pin, uuid_state);
-                    } else if (ctlCommand == "Control_Light_Control" || ctlCommand == "Control_Horn_Control") {
-                      form = emergencyFlashingHornForm(saved_pin, uuid_state);
-                    } else if (ctlCommand == "Control_Charge_Start") {
-                      form = chargeOnForm(saved_pin, uuid_state);
-                    } else if (ctlCommand == "Control_Charge_Stop") {
-                      form = chargeOffForm(saved_pin, uuid_state);
-                    }
-
-                    formData = JSON.stringify(form);
-                    //Post 요청을 위해 데이터를 JSON 형식으로 변환하여 body에 포함
-
-                    var options = {
-                      'url': commandURL(ctlCommand, vehicleId),
-                      'method': 'POST',
-                      'headers': headers,
-                      'body': formData,
-                    }
-
-                    console.log(options);
-
-                    // Start the request
-                    request(options, function (hmcError, hmcResponse, hmcBody) {
-                      if (hmcError) {
-                        console.error("SERVER :: Request for HMC server ERROR!");
-                        console.error(hmcError);
-                        res.end();
-                        return hmcError
+                      if (ctlCommand == "Control_Engine_Start") {
+                        form = engineStartForm(saved_pin, uuid_state, temperature);
+                      } else if (ctlCommand == "Control_Engine_Stop") {
+                        form = engineStopForm(saved_pin, uuid_state);
+                      } else if (ctlCommand == "Control_Door_Close") {
+                        form = closeDoorForm(saved_pin, uuid_state);
+                      } else if (ctlCommand == "Control_Light_Control" || ctlCommand == "Control_Horn_Control") {
+                        form = emergencyFlashingHornForm(saved_pin, uuid_state);
+                      } else if (ctlCommand == "Control_Charge_Start") {
+                        form = chargeOnForm(saved_pin, uuid_state);
+                      } else if (ctlCommand == "Control_Charge_Stop") {
+                        form = chargeOffForm(saved_pin, uuid_state);
                       }
-                      else {
-                        console.log("SERVER :: Requesting for HMC");
-                        console.log("SERVER :: Body ::::::::");
-                        console.log(hmcBody);
-                        var obj = JSON.parse(hmcBody);
 
-                        if (obj.errMsg) {
-                          /***************************************************
-                          현대 API Server로 이미 명령을 전송 한 상태일 때
-                          한번 더 명령 수행 요청 시 API 서버에서 명령 수행 중 or 
-                          명령 중복 Message를 전송할 때 걸리는 조건.
-                          ***************************************************/
-                          console.log("SERVER :: HMC server error message :: " + obj.errMsg + " ("+ obj.errCode + ")");
-                          console.log("SERVER :: " + ctlCommand + " Command waiting : " + vehicleId);
+                      formData = JSON.stringify(form);
+                      //Post 요청을 위해 데이터를 JSON 형식으로 변환하여 body에 포함
 
-                          var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ? AND `chatbot_status` = ?"
-                          connection.query(resSQL, ["Error", obj.errCode], function (resError, resResult, resBody) {
-                            if (resError) {
-                              console.error("SERVER :: DB ERROR :: tb_response_text connection error");
-                              console.error(resError);
-                              res.end();
-                              return resError
-                            }
+                      var options = {
+                        'url': commandURL(ctlCommand, vehicleId),
+                        'method': 'POST',
+                        'headers': headers,
+                        'body': formData,
+                      }
 
-                            res.json({
-                              "type": resResult[0].response_type,
-                              "text": resResult[0].response_text,
-                              "object1": resResult[0].response_object1,
-                              "object2": resResult[0].response_object2,
-                            });
-                          });
-                        } else {
-                          /***************************************************
-                          챗봇 서버에서 현대 API Server로 명령 전달 후
-                          수행 결과 도착 시 챗봇 서버와 소켓 연결 된
-                          로그 클라이언트로 로그 내용 전송
-                          ***************************************************/
-                          console.log("SERVER :: Pin Correct : HMC Response correct: " + insert_pin);
+                      console.log(options);
 
-                          var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
-                          connection.query(updateSQL, [ctlCommand, '8000', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
-                            if (updError) {
-                              console.error("SERVER :: DB ERROR :: tb_command update error");
-                              console.error(updError);
-                              res.end();
-                              return updError
-                            }
+                      // Start the request
+                      request(options, function (hmcError, hmcResponse, hmcBody) {
+                        if (hmcError) {
+                          console.error("SERVER :: Request for HMC server ERROR!");
+                          console.error(hmcError);
+                          res.end();
+                          return hmcError
+                        }
+                        else {
+                          console.log("SERVER :: Requesting for HMC");
+                          
+                          var obj = JSON.parse(hmcBody);
 
-                            console.log("SERVER :: HMC Requested : " + ctlCommand);
+                          if (obj.errMsg) {
+                            /***************************************************
+                            현대 API Server로 이미 명령을 전송 한 상태일 때
+                            한번 더 명령 수행 요청 시 API 서버에서 명령 수행 중 or 
+                            명령 중복 Message를 전송할 때 걸리는 조건.
+                            ***************************************************/
+                            console.log("SERVER :: HMC server error message :: " + obj.errMsg + " ("+ obj.errCode + ")");
+                            console.log("SERVER :: " + ctlCommand + " Command waiting : " + vehicleId);
 
                             var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ? AND `chatbot_status` = ?"
-                            connection.query(resSQL, [ctlCommand, "end"], function (resError, resResult, resBody) {
+                            connection.query(resSQL, [intention, obj.errCode], function (resError, resResult, resBody) {
                               if (resError) {
                                 console.error("SERVER :: DB ERROR :: tb_response_text connection error");
                                 console.error(resError);
@@ -1179,23 +1142,61 @@ router.post('/message', function (req, res, next) {
                                 return resError
                               }
 
-                              if (ctlCommand == "Control_Engine_Start") {
-                                var message = util.format(resResult[0].response_text, temperature);
-                              } else {
-                                var message = resResult[0].response_text;
-                              }
-
                               res.json({
                                 "type": resResult[0].response_type,
-                                "text": message,
+                                "text": resResult[0].response_text,
                                 "object1": resResult[0].response_object1,
                                 "object2": resResult[0].response_object2,
                               });
                             });
-                          });
+                          } else {
+                            /***************************************************
+                            챗봇 서버에서 현대 API Server로 명령 전달 후
+                            수행 결과 도착 시 챗봇 서버와 소켓 연결 된
+                            로그 클라이언트로 로그 내용 전송
+                            ***************************************************/
+                            console.log("SERVER :: Pin Correct : HMC Response correct: " + insert_pin);
+
+                            var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
+                            connection.query(updateSQL, [ctlCommand, '8000', object.content, null, null, object.user_key], function (updError, updResult, updBody) {
+                              if (updError) {
+                                console.error("SERVER :: DB ERROR :: tb_command update error");
+                                console.error(updError);
+                                res.end();
+                                return updError
+                              }
+
+                              console.log("SERVER :: HMC Requested : " + ctlCommand);
+
+                              var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ? AND `chatbot_status` = ?"
+                              connection.query(resSQL, [ctlCommand, "end"], function (resError, resResult, resBody) {
+                                if (resError) {
+                                  console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                                  console.error(resError);
+                                  res.end();
+                                  return resError
+                                }
+
+                                if (ctlCommand == "Control_Engine_Start") {
+                                  var message = util.format(resResult[0].response_text, temperature);
+                                } else {
+                                  var message = resResult[0].response_text;
+                                }
+
+                                res.json({
+                                  "type": resResult[0].response_type,
+                                  "text": message,
+                                  "object1": resResult[0].response_object1,
+                                  "object2": resResult[0].response_object2,
+                                });
+                              });
+                            });
+                          }
                         }
-                      }
-                    });
+                      });
+                    }
+
+                    
                   } else {
                     // Pin 이 일치하지 않는 경우 
                     var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ? AND `chatbot_status` = ?"
