@@ -1431,28 +1431,42 @@ router.post('/message', function (req, res, next) {
                           res.end();
                           return updError
                         }
-                        var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
-                        connection.query(resSQL, [ctlCommand, "temp"], function (resError, resResult, resBody) {
-                          if (resError) {
-                            console.error("SERVER :: DB ERROR :: tb_response_text connection error");
-                            console.error(resError);
-                            res.end();
-                            return resError
-                          }
 
-                          if (ctlCommand == "Control_Engine_Start") {
-                            var message = util.format(resResult[0].response_text, get_temperature(object.content));
-                          } else {
-                            var message = resResult[0].response_text;
-                          }
+                        if (ctlCommand == "Control_Engine_Start" || intention == "Control_Engine_Start") {
+                          var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=? AND `chatbot_status`=?";
+                          connection.query(resSQL, [ctlCommand, "temp"], function (resError, resResult, resBody) {
+                            if (resError) {
+                              console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                              console.error(resError);
+                              res.end();
+                              return resError
+                            }
 
-                          res.json({
-                            "type": resResult[0].response_type,
-                            "text": message,
-                            "object1": resResult[0].response_object1,
-                            "object2": resResult[0].response_object2,
+                            res.json({
+                              "type": resResult[0].response_type,
+                              "text": util.format(resResult[0].response_text, get_temperature(object.content)),
+                              "object1": resResult[0].response_object1,
+                              "object2": resResult[0].response_object2,
+                            });
                           });
-                        });
+                        } else {
+                          var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention`=?";
+                          connection.query(resSQL, "Fail", function (resError, resResult, resBody) {
+                            if (resError) {
+                              console.error("SERVER :: DB ERROR :: tb_response_text connection error");
+                              console.error(resError);
+                              res.end();
+                              return resError
+                            }
+
+                            res.json({
+                              "type": resResult[0].response_type,
+                              "text": resResult[0].response_text,
+                              "object1": resResult[0].response_object1,
+                              "object2": resResult[0].response_object2,
+                            });
+                          });
+                        }
                       });
                     }
                   }
