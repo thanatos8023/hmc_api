@@ -7,6 +7,7 @@ var uuid = require('uuid');
 var fs = require('fs');
 var util = require('util');
 var dateUtils = require("date-utils");
+var date = new Date();
 
 /***************************************************
 데이터베이스 연결 초기화 후 테스트 연결 수행
@@ -601,7 +602,7 @@ router.post('/controlcallbackurl', function (req, res, next) {
 
   var stmt = 'update `TB_COMMAND` set  `status` = ? where `user_id` = ?';
   connection.query(stmt, [resultCode, strArr[0]], function (err, result) {
-    console.log(dateUtils.toFormat('YYYY-MM-DD HH24:MI:SS'));
+    console.log(date.toFormat('YYYY-MM-DD HH24:MI:SS'));
     console.log("SERVER :: Request controlcallback! :: vehicle status change");
     console.log("msgId : " + msgId + " resultCode : " + resultCode + " resultMsg : " + resultMsg);
   })
@@ -1157,7 +1158,7 @@ router.post('/message', function (req, res, next) {
                             수행 결과 도착 시 챗봇 서버와 소켓 연결 된
                             로그 클라이언트로 로그 내용 전송
                             ***************************************************/
-                            console.log(dateUtils.toFormat('YYYY-MM-DD HH24:MI:SS'));
+                            console.log(date.toFormat('YYYY-MM-DD HH24:MI:SS'));
                             console.log("SERVER :: Pin Correct : HMC Response correct: " + insert_pin);
 
                             var updateSQL = "UPDATE `tb_command` SET `control_command`=?, `status`=?, `input_utterance`=?, `temp`=?, `pin`=? WHERE `user_id`=?"
