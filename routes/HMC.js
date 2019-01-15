@@ -222,7 +222,7 @@ function chargeOffForm(pin, msgId) {
 }
 
 function commandURL(command, vehicleId) {
-  var str = 'http://bluelink.connected-car.io/api/v1/vehicles/' + vehicleId;
+  var str = 'https://stg.kr-ccapi.hyundai.com/api/v1/vehicles' + vehicleId;
 
   if (command == "Control_Engine_Start" || command == "Control_Engine_Stop") {
     str = str + '/control/engine'
@@ -523,7 +523,7 @@ router.get('/oauth2url', function (req, res, next) {
   console.log(formData);
 
   var options = {
-    'url': 'http://bluelink.connected-car.io/api/v1/user/oauth2/token',
+    'url': 'https://stg.kr-ccapi.hyundai.com/api/v1/user/oauth2/token',
     'method': 'POST',
     'headers': headers,
     //'form':form
@@ -552,7 +552,7 @@ router.get('/oauth2url', function (req, res, next) {
 
           // Configure the request
           var getVehicleOptions = {
-            url: 'http://bluelink.connected-car.io/api/v1/vehicles',
+            url: 'https://stg.kr-ccapi.hyundai.com/api/v1/vehicles',
             method: 'GET',
             headers: getVehicleHeaders
           }
@@ -647,7 +647,7 @@ router.post('/message', function (req, res, next) {
             {
               "action": "webLink", 
               "label": "현대 블루링크 로그인",
-              "url": 'http://bluelink.connected-car.io/api/v1/user/oauth2/authorize?client_id=03f251b4-75ca-4042-bbc1-c8375a767a82&redirect_uri=http://58.225.115.230:23701/hmc/oauth2url&response_type=code&state=' + object.user_key
+              "url": 'https://stg.kr-ccapi.hyundai.com/api/v1/user/oauth2/authorize?client_id=03f251b4-75ca-4042-bbc1-c8375a767a82&redirect_uri=http://13.125.73.118:3000/hmc/oauth2url&response_type=code&state=' + object.user_key
             }
           ];
 
@@ -674,7 +674,7 @@ router.post('/message', function (req, res, next) {
             {
               "action": "webLink",
               "label": "현대 블루링크 차량 등록",
-              "url": 'http://bluelink.connected-car.io/api/v1/user/oauth2/authorize?client_id=03f251b4-75ca-4042-bbc1-c8375a767a82&redirect_uri=http://58.225.115.230:23701/hmc/oauth2url&response_type=code&state=' + object.user_key
+              "url": 'https://stg.kr-ccapi.hyundai.com/api/v1/user/oauth2/authorize?client_id=03f251b4-75ca-4042-bbc1-c8375a767a82&redirect_uri=http://13.125.73.118:3000/hmc/oauth2url&response_type=code&state=' + object.user_key
             }
           ]
 
@@ -1134,6 +1134,7 @@ router.post('/message', function (req, res, next) {
                             명령 중복 Message를 전송할 때 걸리는 조건.
                             ***************************************************/
                             console.log("SERVER :: HMC server error message :: " + obj.errMsg + " ("+ obj.errCode + ")");
+                            console.log(date.toFormat('YYYY-MM-DD HH24:MI:SS'));
                             console.log("SERVER :: " + ctlCommand + " Command waiting : " + vehicleId);
 
                             var resSQL = "SELECT * FROM `tb_response_text` WHERE `intention` = ? AND `chatbot_status` = ?"
