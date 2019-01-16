@@ -602,8 +602,8 @@ router.post('/controlcallbackurl', function (req, res, next) {
   var msgId = req.body.msgId;
   var strArr = msgId.split('&');
 
-  var stmt = 'update `TB_COMMAND` set  `status` = ? where `user_id` = ?';
-  connection.query(stmt, [resultCode, strArr[0]], function (err, result) {
+  var stmt = 'update `TB_COMMAND` set  `control_command` = ?, `status` = ?, `temp` = ? where `user_id` = ?';
+  connection.query(stmt, [null, resultCode, null, strArr[0]], function (err, result) {
     console.log(date.toFormat('YYYY-MM-DD HH24:MI:SS'));
     console.log("SERVER :: Request controlcallback! :: vehicle status change");
     console.log("msgId : " + msgId + " resultCode : " + resultCode + " resultMsg : " + resultMsg);
