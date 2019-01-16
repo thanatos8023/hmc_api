@@ -503,6 +503,8 @@ router.post('/confirmPin', function (req, res, netx) {
 router.get('/oauth2url', function (req, res, next) {
   var code = req.query.code; //authorize_code
   var state = req.query.state; //kakao_id(encrypt code)
+  state = state.replace('<', '');
+  state = state.replace('>', '');
   //http://bluelink.connected-car.io/api/v1/user/oauth2/authorize?client_id=03f251b4-75ca-4042-bbc1-c8375a767a82&redirect_uri=http://58.225.115.230:23701/hmc/oauth2url&response_type=code&state=TVbOd1iDgZ-x
   var Authorization = "03f251b4-75ca-4042-bbc1-c8375a767a82:tUt6k9285c8G7q3LjkJYCkBLT2G7a6qPu70S5fOvVjwvej4d"; //Client ID:Client Secret
   var buffer = new Buffer(Authorization);
