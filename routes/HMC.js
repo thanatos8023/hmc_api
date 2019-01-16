@@ -1096,7 +1096,7 @@ router.post('/message', function (req, res, next) {
                         form = engineStopForm(saved_pin, uuid_state);
                       } else if (ctlCommand == "Control_Door_Close") {
                         form = closeDoorForm(saved_pin, uuid_state);
-                      } else if (ctlCommand == "Control_Light_Control" || ctlCommand == "Control_Horn_Control") {
+                      } else if (ctlCommand == "Control_Light_On" || ctlCommand == "Control_Horn_On") {
                         form = emergencyFlashingHornForm(saved_pin, uuid_state);
                       } else if (ctlCommand == "Control_Charge_Start") {
                         form = chargeOnForm(saved_pin, uuid_state);
