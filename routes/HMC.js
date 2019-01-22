@@ -653,10 +653,21 @@ router.post('/message', function (req, res, next) {
             }
           ];
 
-          res.json({
-            "type": "messageButton",
-            "text": resResult[0].response_text,
-            "object1": JSON.stringify(button)
+          // 모니터링 DB에 등록 후에 응답 
+          var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+          connection.query(udtSQL, [object.user_key, null, null, "Not User", object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+            if (udtErr) {
+              console.error("SERVER :: DB ERROR :: monitoring DB update error");
+              console.error(udtErr);
+              res.end();
+              return udtErr
+            }
+
+            res.json({
+              "type": "messageButton",
+              "text": resResult[0].response_text,
+              "object1": JSON.stringify(button)
+            });
           });
         });
       //추후 차량이 없는 회원이 가입했을 때 탈퇴 시킨 후 다시 회원가입 하면서 차량을 등록하라고 메세지 띄울 곳. 
@@ -680,10 +691,21 @@ router.post('/message', function (req, res, next) {
             }
           ]
 
-          res.json({
-            "type": "messageButton",
-            "text": resResult[0].response_text,
-            "object1": JSON.stringify(button)
+          // 모니터링 DB에 등록 후에 응답 
+          var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+          connection.query(udtSQL, [object.user_key, null, null, "No Car", object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+            if (udtErr) {
+              console.error("SERVER :: DB ERROR :: monitoring DB update error");
+              console.error(udtErr);
+              res.end();
+              return udtErr
+            }
+
+            res.json({
+              "type": "messageButton",
+              "text": resResult[0].response_text,
+              "object1": JSON.stringify(button)
+            });
           });
         });
       } else { // 사용자 정보가 존재 
@@ -730,11 +752,22 @@ router.post('/message', function (req, res, next) {
                 return resError
               }
 
-              res.json({
-                "type": resResult[0].response_type,
-                "text": resResult[0].response_text,
-                "object1": resResult[0].response_object1,
-                "object2": resResult[0].response_object2,
+              // 모니터링 DB에 등록 후에 응답 
+              var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+              connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                if (udtErr) {
+                  console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                  console.error(udtErr);
+                  res.end();
+                  return udtErr
+                }
+
+                res.json({
+                  "type": resResult[0].response_type,
+                  "text": resResult[0].response_text,
+                  "object1": resResult[0].response_object1,
+                  "object2": resResult[0].response_object2,
+                });
               });
             });
           } else {
@@ -760,11 +793,22 @@ router.post('/message', function (req, res, next) {
                         return updError
                       }
 
-                      res.json({
-                        "type": resResult[0].response_type,
-                        "text": resResult[0].response_text,
-                        "object1": resResult[0].response_object1,
-                        "object2": resResult[0].response_object2,
+                      // 모니터링 DB에 등록 후에 응답 
+                      var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                      connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                        if (udtErr) {
+                          console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                          console.error(udtErr);
+                          res.end();
+                          return udtErr
+                        }
+
+                        res.json({
+                          "type": resResult[0].response_type,
+                          "text": resResult[0].response_text,
+                          "object1": resResult[0].response_object1,
+                          "object2": resResult[0].response_object2,
+                        });
                       });
                     });
                   });
@@ -787,11 +831,22 @@ router.post('/message', function (req, res, next) {
                         return delError
                       }
 
-                      res.json({
-                        "type": resResult[0].response_type,
-                        "text": resResult[0].response_text,
-                        "object1": resResult[0].response_object1,
-                        "object2": resResult[0].response_object2,
+                      // 모니터링 DB에 등록 후에 응답 
+                      var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                      connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                        if (udtErr) {
+                          console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                          console.error(udtErr);
+                          res.end();
+                          return udtErr
+                        }
+
+                        res.json({
+                          "type": resResult[0].response_type,
+                          "text": resResult[0].response_text,
+                          "object1": resResult[0].response_object1,
+                          "object2": resResult[0].response_object2,
+                        });
                       });
                     });
                   });
@@ -821,11 +876,22 @@ router.post('/message', function (req, res, next) {
                           return resError
                         }
 
-                        res.json({
-                          "type": resResult[0].response_type,
-                          "text": resResult[0].response_text,
-                          "object1": resResult[0].response_object1,
-                          "object2": resResult[0].response_object2,
+                        // 모니터링 DB에 등록 후에 응답 
+                        var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                        connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                          if (udtErr) {
+                            console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                            console.error(udtErr);
+                            res.end();
+                            return udtErr
+                          }
+
+                          res.json({
+                            "type": resResult[0].response_type,
+                            "text": resResult[0].response_text,
+                            "object1": resResult[0].response_object1,
+                            "object2": resResult[0].response_object2,
+                          });
                         });
                       });
                     });
@@ -848,11 +914,22 @@ router.post('/message', function (req, res, next) {
                           return resError
                         }
 
-                        res.json({
-                          "type": resResult[0].response_type,
-                          "text": resResult[0].response_text,
-                          "object1": resResult[0].response_object1,
-                          "object2": resResult[0].response_object2,
+                        // 모니터링 DB에 등록 후에 응답 
+                        var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                        connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                          if (udtErr) {
+                            console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                            console.error(udtErr);
+                            res.end();
+                            return udtErr
+                          }
+
+                          res.json({
+                            "type": resResult[0].response_type,
+                            "text": resResult[0].response_text,
+                            "object1": resResult[0].response_object1,
+                            "object2": resResult[0].response_object2,
+                          });
                         });
                       });
                     });
@@ -874,11 +951,22 @@ router.post('/message', function (req, res, next) {
                           return resError
                         }
 
-                        res.json({
-                          "type": resResult[0].response_type,
-                          "text": util.format(resResult[0].response_text, temp),
-                          "object1": resResult[0].response_object1,
-                          "object2": resResult[0].response_object2,
+                        // 모니터링 DB에 등록 후에 응답 
+                        var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                        connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                          if (udtErr) {
+                            console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                            console.error(udtErr);
+                            res.end();
+                            return udtErr
+                          }
+
+                          res.json({
+                            "type": resResult[0].response_type,
+                            "text": resResult[0].response_text,
+                            "object1": resResult[0].response_object1,
+                            "object2": resResult[0].response_object2,
+                          });
                         });
                       });
                     });
@@ -908,11 +996,22 @@ router.post('/message', function (req, res, next) {
                         return resError
                       }
 
-                      res.json({
-                        "type": resResult[0].response_type,
-                        "text": resResult[0].response_text,
-                        "object1": resResult[0].response_object1,
-                        "object2": resResult[0].response_object2,
+                      // 모니터링 DB에 등록 후에 응답 
+                      var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                      connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                        if (udtErr) {
+                          console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                          console.error(udtErr);
+                          res.end();
+                          return udtErr
+                        }
+
+                        res.json({
+                          "type": resResult[0].response_type,
+                          "text": resResult[0].response_text,
+                          "object1": resResult[0].response_object1,
+                          "object2": resResult[0].response_object2,
+                        });
                       });
                     });
                   });
@@ -938,11 +1037,22 @@ router.post('/message', function (req, res, next) {
                         return resError
                       }
 
-                      res.json({
-                        "type": resResult[0].response_type,
-                        "text": resResult[0].response_text,
-                        "object1": resResult[0].response_object1,
-                        "object2": resResult[0].response_object2,
+                      // 모니터링 DB에 등록 후에 응답 
+                      var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                      connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                        if (udtErr) {
+                          console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                          console.error(udtErr);
+                          res.end();
+                          return udtErr
+                        }
+
+                        res.json({
+                          "type": resResult[0].response_type,
+                          "text": resResult[0].response_text,
+                          "object1": resResult[0].response_object1,
+                          "object2": resResult[0].response_object2,
+                        });
                       });
                     });
                   });
@@ -958,9 +1068,20 @@ router.post('/message', function (req, res, next) {
                       return updError
                     }
 
-                    res.json({
-                      "type": "simpleText",
-                      "text": object.content
+                    // 모니터링 DB에 등록 후에 응답 
+                    var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                    connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                      if (udtErr) {
+                        console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                        console.error(udtErr);
+                        res.end();
+                        return udtErr
+                      }
+
+                      res.json({
+                        "type": "simpleText",
+                        "text": object.content
+                      });
                     });
                   });
 
@@ -985,11 +1106,22 @@ router.post('/message', function (req, res, next) {
                         return updError
                       }
 
-                      res.json({
-                        "type": resResult[0].response_type,
-                        "text": resResult[0].response_text,
-                        "object1": resResult[0].response_object1,
-                        "object2": resResult[0].response_object2,
+                      // 모니터링 DB에 등록 후에 응답 
+                      var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                      connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                        if (udtErr) {
+                          console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                          console.error(udtErr);
+                          res.end();
+                          return udtErr
+                        }
+
+                        res.json({
+                          "type": resResult[0].response_type,
+                          "text": resResult[0].response_text,
+                          "object1": resResult[0].response_object1,
+                          "object2": resResult[0].response_object2,
+                        });
                       });
                     });
                   });
@@ -1016,11 +1148,22 @@ router.post('/message', function (req, res, next) {
                       return resError
                     }
 
-                    res.json({
-                      "type": resResult[0].response_type,
-                      "text": resResult[0].response_text,
-                      "object1": resResult[0].response_object1,
-                      "object2": resResult[0].response_object2,
+                    // 모니터링 DB에 등록 후에 응답 
+                    var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                    connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                      if (udtErr) {
+                        console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                        console.error(udtErr);
+                        res.end();
+                        return udtErr
+                      }
+
+                      res.json({
+                        "type": resResult[0].response_type,
+                        "text": resResult[0].response_text,
+                        "object1": resResult[0].response_object1,
+                        "object2": resResult[0].response_object2,
+                      });
                     });
                   });
                 } else { // 제어 명령이 실행 중일 때, 제어가 아닌 다른 명령이 들어온 경우
@@ -1043,11 +1186,22 @@ router.post('/message', function (req, res, next) {
                         return updError
                       }
 
-                      res.json({
-                        "type": resResult[0].response_type,
-                        "text": resResult[0].response_text,
-                        "object1": resResult[0].response_object1,
-                        "object2": resResult[0].response_object2,
+                      // 모니터링 DB에 등록 후에 응답 
+                      var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                      connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                        if (udtErr) {
+                          console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                          console.error(udtErr);
+                          res.end();
+                          return udtErr
+                        }
+
+                        res.json({
+                          "type": resResult[0].response_type,
+                          "text": resResult[0].response_text,
+                          "object1": resResult[0].response_object1,
+                          "object2": resResult[0].response_object2,
+                        });
                       });
                     });                
                   });
@@ -1076,11 +1230,22 @@ router.post('/message', function (req, res, next) {
                           return resError
                         }
 
-                        res.json({
-                          "type": resResult[0].response_type,
-                          "text": resResult[0].response_text,
-                          "object1": resResult[0].response_object1,
-                          "object2": resResult[0].response_object2,
+                        // 모니터링 DB에 등록 후에 응답 
+                        var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                        connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                          if (udtErr) {
+                            console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                            console.error(udtErr);
+                            res.end();
+                            return udtErr
+                          }
+
+                          res.json({
+                            "type": resResult[0].response_type,
+                            "text": resResult[0].response_text,
+                            "object1": resResult[0].response_object1,
+                            "object2": resResult[0].response_object2,
+                          });
                         });
                       });
                     } else {
@@ -1148,11 +1313,22 @@ router.post('/message', function (req, res, next) {
                                 return resError
                               }
 
-                              res.json({
-                                "type": resResult[0].response_type,
-                                "text": resResult[0].response_text,
-                                "object1": resResult[0].response_object1,
-                                "object2": resResult[0].response_object2,
+                              // 모니터링 DB에 등록 후에 응답 
+                              var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                              connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                                if (udtErr) {
+                                  console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                                  console.error(udtErr);
+                                  res.end();
+                                  return udtErr
+                                }
+
+                                res.json({
+                                  "type": resResult[0].response_type,
+                                  "text": resResult[0].response_text,
+                                  "object1": resResult[0].response_object1,
+                                  "object2": resResult[0].response_object2,
+                                });
                               });
                             });
                           } else {
@@ -1190,11 +1366,22 @@ router.post('/message', function (req, res, next) {
                                   var message = resResult[0].response_text;
                                 }
 
-                                res.json({
-                                  "type": resResult[0].response_type,
-                                  "text": message,
-                                  "object1": resResult[0].response_object1,
-                                  "object2": resResult[0].response_object2,
+                                // 모니터링 DB에 등록 후에 응답 
+                                var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                                connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                                  if (udtErr) {
+                                    console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                                    console.error(udtErr);
+                                    res.end();
+                                    return udtErr
+                                  }
+
+                                  res.json({
+                                    "type": resResult[0].response_type,
+                                    "text": message,
+                                    "object1": resResult[0].response_object1,
+                                    "object2": resResult[0].response_object2,
+                                  });
                                 });
                               });
                             });
@@ -1215,11 +1402,22 @@ router.post('/message', function (req, res, next) {
                         return resError
                       }
 
-                      res.json({
-                        "type": resResult[0].response_type,
-                        "text": resResult[0].response_text,
-                        "object1": resResult[0].response_object1,
-                        "object2": resResult[0].response_object2,
+                      // 모니터링 DB에 등록 후에 응답 
+                      var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                      connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                        if (udtErr) {
+                          console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                          console.error(udtErr);
+                          res.end();
+                          return udtErr
+                        }
+
+                        res.json({
+                          "type": resResult[0].response_type,
+                          "text": resResult[0].response_text,
+                          "object1": resResult[0].response_object1,
+                          "object2": resResult[0].response_object2,
+                        });
                       });
                     });
                   }
@@ -1245,9 +1443,19 @@ router.post('/message', function (req, res, next) {
                         return updError
                       }
 
-                      res.json({
-                        "type": "image",
-                        "object1": foodResult[0].jpg,
+                      // 모니터링 DB에 등록 후에 응답 
+                      var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                      connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                        if (udtErr) {
+                          console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                          console.error(udtErr);
+                          res.end();
+                          return udtErr
+                        }
+                        res.json({
+                          "type": "image",
+                          "object1": foodResult[0].jpg,
+                        });
                       });
                     });
                   });
@@ -1273,9 +1481,20 @@ router.post('/message', function (req, res, next) {
                         return updError
                       }
 
-                      res.json({
-                        "type": "image",
-                        "object1": tourResult[0].jpg,
+                      // 모니터링 DB에 등록 후에 응답 
+                      var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                      connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                        if (udtErr) {
+                          console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                          console.error(udtErr);
+                          res.end();
+                          return udtErr
+                        }
+
+                        res.json({
+                          "type": "image",
+                          "object1": tourResult[0].jpg,
+                        });
                       });
                     });
                   });
@@ -1300,11 +1519,22 @@ router.post('/message', function (req, res, next) {
                         return updError
                       }
 
-                      res.json({
-                        "type": resResult[0].response_type,
-                        "text": resResult[0].response_text,
-                        "object1": resResult[0].response_object1,
-                        "object2": resResult[0].response_object2,
+                      // 모니터링 DB에 등록 후에 응답 
+                      var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                      connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                        if (udtErr) {
+                          console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                          console.error(udtErr);
+                          res.end();
+                          return udtErr
+                        }
+
+                        res.json({
+                          "type": resResult[0].response_type,
+                          "text": resResult[0].response_text,
+                          "object1": resResult[0].response_object1,
+                          "object2": resResult[0].response_object2,
+                        });
                       });
                     });
                   });
@@ -1335,10 +1565,21 @@ router.post('/message', function (req, res, next) {
                           });
                         }
 
-                        res.json({
-                          "type": resResult[0].response_type,
-                          "text": resResult[0].response_text,
-                          "object1": items,
+                        // 모니터링 DB에 등록 후에 응답 
+                        var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                        connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                          if (udtErr) {
+                            console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                            console.error(udtErr);
+                            res.end();
+                            return udtErr
+                          }
+
+                          res.json({
+                            "type": resResult[0].response_type,
+                            "text": resResult[0].response_text,
+                            "object1": items,
+                          });
                         });
                       });
                     });
@@ -1367,11 +1608,22 @@ router.post('/message', function (req, res, next) {
                               return resError
                             }
 
-                            res.json({
-                              "type": resResult[0].response_type,
-                              "text": resResult[0].response_text,
-                              "object1": resResult[0].response_object1,
-                              "object2": resResult[0].response_object2,
+                            // 모니터링 DB에 등록 후에 응답 
+                            var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                            connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                              if (udtErr) {
+                                console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                                console.error(udtErr);
+                                res.end();
+                                return udtErr
+                              }
+
+                              res.json({
+                                "type": resResult[0].response_type,
+                                "text": resResult[0].response_text,
+                                "object1": resResult[0].response_object1,
+                                "object2": resResult[0].response_object2,
+                              });
                             });
                           });
                         });        
@@ -1394,11 +1646,22 @@ router.post('/message', function (req, res, next) {
                               return updError
                             }
 
-                            res.json({
-                              "type": resResult[0].response_type,
-                              "text": resResult[0].response_text,
-                              "object1": resResult[0].response_object1,
-                              "object2": resResult[0].response_object2,
+                            // 모니터링 DB에 등록 후에 응답 
+                            var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                            connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                              if (udtErr) {
+                                console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                                console.error(udtErr);
+                                res.end();
+                                return udtErr
+                              }
+
+                              res.json({
+                                "type": resResult[0].response_type,
+                                "text": resResult[0].response_text,
+                                "object1": resResult[0].response_object1,
+                                "object2": resResult[0].response_object2,
+                              });
                             });
                           });
                         });
@@ -1421,11 +1684,22 @@ router.post('/message', function (req, res, next) {
                             return resError
                           }
 
-                          res.json({
-                            "type": resResult[0].response_type,
-                            "text": resResult[0].response_text,
-                            "object1": resResult[0].response_object1,
-                            "object2": resResult[0].response_object2,
+                          // 모니터링 DB에 등록 후에 응답 
+                          var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                          connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                            if (udtErr) {
+                              console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                              console.error(udtErr);
+                              res.end();
+                              return udtErr
+                            }
+
+                            res.json({
+                              "type": resResult[0].response_type,
+                              "text": resResult[0].response_text,
+                              "object1": resResult[0].response_object1,
+                              "object2": resResult[0].response_object2,
+                            });
                           });
                         });
                       });
@@ -1449,11 +1723,22 @@ router.post('/message', function (req, res, next) {
                               return resError
                             }
 
-                            res.json({
-                              "type": resResult[0].response_type,
-                              "text": util.format(resResult[0].response_text, get_temperature(object.content)),
-                              "object1": resResult[0].response_object1,
-                              "object2": resResult[0].response_object2,
+                            // 모니터링 DB에 등록 후에 응답 
+                            var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                            connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                              if (udtErr) {
+                                console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                                console.error(udtErr);
+                                res.end();
+                                return udtErr
+                              }
+
+                              res.json({
+                                "type": resResult[0].response_type,
+                                "text": util.format(resResult[0].response_text, get_temperature(object.content)),
+                                "object1": resResult[0].response_object1,
+                                "object2": resResult[0].response_object2,
+                              });
                             });
                           });
                         } else {
@@ -1466,11 +1751,22 @@ router.post('/message', function (req, res, next) {
                               return resError
                             }
 
-                            res.json({
-                              "type": resResult[0].response_type,
-                              "text": resResult[0].response_text,
-                              "object1": resResult[0].response_object1,
-                              "object2": resResult[0].response_object2,
+                            // 모니터링 DB에 등록 후에 응답 
+                            var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
+                            connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                              if (udtErr) {
+                                console.error("SERVER :: DB ERROR :: monitoring DB update error");
+                                console.error(udtErr);
+                                res.end();
+                                return udtErr
+                              }
+
+                              res.json({
+                                "type": resResult[0].response_type,
+                                "text": resResult[0].response_text,
+                                "object1": resResult[0].response_object1,
+                                "object2": resResult[0].response_object2,
+                              });
                             });
                           });
                         }
