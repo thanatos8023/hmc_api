@@ -1445,7 +1445,7 @@ router.post('/message', function (req, res, next) {
 
                       // 모니터링 DB에 등록 후에 응답 
                       var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
-                      connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                      connection.query(udtSQL, [object.user_key, type, status, intention, object.content, "image of location"], function (udtErr, udtResult, udtField) {
                         if (udtErr) {
                           console.error("SERVER :: DB ERROR :: monitoring DB update error");
                           console.error(udtErr);
@@ -1483,7 +1483,7 @@ router.post('/message', function (req, res, next) {
 
                       // 모니터링 DB에 등록 후에 응답 
                       var udtSQL = "INSERT INTO tb_monitoring(user_id, car_type, bluelink_status, intention, user_input, response_text) VALUES (?, ?, ?, ?, ?, ?)";
-                      connection.query(udtSQL, [object.user_key, type, status, intention, object.content, resResult[0].response_text], function (udtErr, udtResult, udtField) {
+                      connection.query(udtSQL, [object.user_key, type, status, intention, object.content, "image of location"], function (udtErr, udtResult, udtField) {
                         if (udtErr) {
                           console.error("SERVER :: DB ERROR :: monitoring DB update error");
                           console.error(udtErr);
