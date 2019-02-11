@@ -649,7 +649,7 @@ router.post('/message', function (req, res, next) {
             {
               "action": "webLink", 
               "label": "현대 블루링크 로그인",
-              "url": 'https://stg.kr-ccapi.hyundai.com/api/v1/user/oauth2/authorize?client_id=03f251b4-75ca-4042-bbc1-c8375a767a82&redirect_uri=http://58.225.115.230:23701/hmc/oauth2url&response_type=code&state=<' + object.user_key + '>'
+              "url": 'https://stg.kr-ccapi.hyundai.com/api/v1/user/oauth2/authorize?client_id=03f251b4-75ca-4042-bbc1-c8375a767a82&redirect_uri=http://58.225.115.230:23701/hmc/oauth2url&response_type=code&state=' + object.user_key
             }
           ];
 
@@ -687,7 +687,7 @@ router.post('/message', function (req, res, next) {
             {
               "action": "webLink",
               "label": "현대 블루링크 차량 등록",
-              "url": 'https://stg.kr-ccapi.hyundai.com/api/v1/user/oauth2/authorize?client_id=03f251b4-75ca-4042-bbc1-c8375a767a82&redirect_uri=http://58.225.115.230:23701/hmc/oauth2url&response_type=code&state=<' + object.user_key + '>'
+              "url": 'https://stg.kr-ccapi.hyundai.com/api/v1/user/oauth2/authorize?client_id=03f251b4-75ca-4042-bbc1-c8375a767a82&redirect_uri=http://58.225.115.230:23701/hmc/oauth2url&response_type=code&state=' + object.user_key
             }
           ]
 
