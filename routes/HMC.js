@@ -595,6 +595,22 @@ router.get('/oauth2url', function (req, res, next) {
 router.io.emit 명령어를 통해 명령 수행 결과 로그를
 소켓에 연결 된 로그 확인 클라이언트들로 전송
 ***************************************************/
+router.get('/controlcallbackurl', function (req, res, next) {
+  console.log(req);
+  var resultMsg = req.body.resultMsg;
+  var resultCode = req.body.resultCode;
+  var msgId = req.body.msgId;
+  var strArr = msgId.split('&');
+
+  var stmt = 'update `TB_COMMAND` set  `control_command` = ?, `status` = ?, `temp` = ? where `user_id` = ?';
+  connection.query(stmt, [null, resultCode, null, strArr[0]], function (err, result) {
+    var date = new Date();
+    console.log(date.toFormat('YYYY-MM-DD HH24:MI:SS'));
+    console.log("SERVER :: Request controlcallback! :: vehicle status change");
+    console.log("msgId : " + msgId + " resultCode : " + resultCode + " resultMsg : " + resultMsg);
+  })
+});
+
 router.post('/controlcallbackurl', function (req, res, next) {
   var resultMsg = req.body.resultMsg;
   var resultCode = req.body.resultCode;
@@ -963,7 +979,7 @@ router.post('/message', function (req, res, next) {
 
                           res.json({
                             "type": resResult[0].response_type,
-                            "text": resResult[0].response_text,
+                            "text": util.format(resResult[0].response_text, temperature),
                             "object1": resResult[0].response_object1,
                             "object2": resResult[0].response_object2,
                           });
