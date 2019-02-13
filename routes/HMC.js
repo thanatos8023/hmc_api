@@ -7,7 +7,6 @@ var uuid = require('uuid');
 var fs = require('fs');
 var util = require('util');
 var dateUtils = require("date-utils");
-var date = new Date();
 
 /***************************************************
 데이터베이스 연결 초기화 후 테스트 연결 수행
@@ -604,6 +603,7 @@ router.post('/controlcallbackurl', function (req, res, next) {
 
   var stmt = 'update `TB_COMMAND` set  `control_command` = ?, `status` = ?, `temp` = ? where `user_id` = ?';
   connection.query(stmt, [null, resultCode, null, strArr[0]], function (err, result) {
+    var date = new Date();
     console.log(date.toFormat('YYYY-MM-DD HH24:MI:SS'));
     console.log("SERVER :: Request controlcallback! :: vehicle status change");
     console.log("msgId : " + msgId + " resultCode : " + resultCode + " resultMsg : " + resultMsg);
@@ -1301,6 +1301,7 @@ router.post('/message', function (req, res, next) {
                             명령 중복 Message를 전송할 때 걸리는 조건.
                             ***************************************************/
                             console.log("SERVER :: HMC server error message :: " + obj.errMsg + " ("+ obj.errCode + ")");
+                            var date = new Date();
                             console.log(date.toFormat('YYYY-MM-DD HH24:MI:SS'));
                             console.log("SERVER :: " + ctlCommand + " Command waiting : " + vehicleId);
 
@@ -1337,6 +1338,7 @@ router.post('/message', function (req, res, next) {
                             수행 결과 도착 시 챗봇 서버와 소켓 연결 된
                             로그 클라이언트로 로그 내용 전송
                             ***************************************************/
+                            var date = new Date();
                             console.log(date.toFormat('YYYY-MM-DD HH24:MI:SS'));
                             console.log("SERVER :: Pin Correct : HMC Response correct: " + insert_pin);
 
