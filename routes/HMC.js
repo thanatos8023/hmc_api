@@ -1306,6 +1306,8 @@ router.post('/message', function (req, res, next) {
                         }
                         else {
                           console.log("SERVER :: Requesting for HMC");
+                          console.log(hmcResponse);
+                          console.log(hmcBody);
                           
                           var obj = JSON.parse(hmcBody);
 
