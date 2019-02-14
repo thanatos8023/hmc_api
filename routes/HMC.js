@@ -391,23 +391,23 @@ router.post('/confirmPin', function (req, res, netx) {
             var form;
 
             if (result[0].control_command == "Engine Start") {
-              //form = engineStartForm(pin, uuid_state, result[0].temp);
-              form = engineStartForm(pin, state, result[0].temp);
+              form = engineStartForm(pin, uuid_state, result[0].temp);
+              //form = engineStartForm(pin, state, result[0].temp);
             } else if (result[0].control_command == "Engine Stop") {
-              //form = engineStopForm(pin, uuid_state);
-              form = engineStopForm(pin, state);
+              form = engineStopForm(pin, uuid_state);
+              //form = engineStopForm(pin, state);
             } else if (result[0].control_command == "Close Door") {
-              //form = closeDoorForm(pin, uuid_state);
-              form = closeDoorForm(pin, state);
+              form = closeDoorForm(pin, uuid_state);
+              //form = closeDoorForm(pin, state);
             } else if (result[0].control_command == "Light Control" || result[0].control_command == "Horn Control") {
-              //form = emergencyFlashingHornForm(pin, uuid_state);
-              form = emergencyFlashingHornForm(pin, state);
+              form = emergencyFlashingHornForm(pin, uuid_state);
+              //form = emergencyFlashingHornForm(pin, state);
             } else if (result[0].control_command == "Charge On Control") {
-              //form = chargeOnForm(pin, uuid_state);
-              form = chargeOnForm(pin, state);
+              form = chargeOnForm(pin, uuid_state);
+              //form = chargeOnForm(pin, state);
             } else if (result[0].control_command == "Charge Off Control") {
-              //form = chargeOffForm(pin, uuid_state);
-              form = chargeOffForm(pin, state);
+              form = chargeOffForm(pin, uuid_state);
+              //form = chargeOffForm(pin, state);
             }
 
             formData = JSON.stringify(form);
@@ -1265,23 +1265,23 @@ router.post('/message', function (req, res, next) {
                       var form;
 
                       if (ctlCommand == "Control_Engine_Start") {
-                        //form = engineStartForm(saved_pin, uuid_state, temperature);
-                        form = engineStartForm(saved_pin, state, temperature);
+                        form = engineStartForm(saved_pin, uuid_state, temperature);
+                        //form = engineStartForm(saved_pin, state, temperature);
                       } else if (ctlCommand == "Control_Engine_Stop") {
-                        //form = engineStopForm(saved_pin, uuid_state);
-                        form = engineStopForm(saved_pin, state);
+                        form = engineStopForm(saved_pin, uuid_state);
+                        //form = engineStopForm(saved_pin, state);
                       } else if (ctlCommand == "Control_Door_Close") {
-                        //form = closeDoorForm(saved_pin, uuid_state);
-                        form = closeDoorForm(saved_pin, state);
+                        form = closeDoorForm(saved_pin, uuid_state);
+                        //form = closeDoorForm(saved_pin, state);
                       } else if (ctlCommand == "Control_Light_On" || ctlCommand == "Control_Horn_On") {
-                        //form = emergencyFlashingHornForm(saved_pin, uuid_state);
-                        form = emergencyFlashingHornForm(saved_pin, state);
+                        form = emergencyFlashingHornForm(saved_pin, uuid_state);
+                        //form = emergencyFlashingHornForm(saved_pin, state);
                       } else if (ctlCommand == "Control_Charge_Start") {
-                        //form = chargeOnForm(saved_pin, uuid_state);
-                        form = chargeOnForm(saved_pin, state);
+                        form = chargeOnForm(saved_pin, uuid_state);
+                        //form = chargeOnForm(saved_pin, state);
                       } else if (ctlCommand == "Control_Charge_Stop") {
-                        //form = chargeOffForm(saved_pin, uuid_state);
-                        form = chargeOffForm(saved_pin, state);
+                        form = chargeOffForm(saved_pin, uuid_state);
+                        //form = chargeOffForm(saved_pin, state);
                       }
 
                       formData = JSON.stringify(form);
