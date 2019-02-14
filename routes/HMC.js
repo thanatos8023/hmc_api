@@ -221,7 +221,7 @@ function chargeOffForm(pin, msgId) {
 }
 
 function commandURL(command, vehicleId) {
-  var str = 'https://stg.kr-ccapi.hyundai.com/api/v1/vehicles' + vehicleId;
+  var str = 'https://stg.kr-ccapi.hyundai.com/api/v1/vehicles/' + vehicleId;
 
   if (command == "Control_Engine_Start" || command == "Control_Engine_Stop") {
     str = str + '/control/engine'
