@@ -391,17 +391,23 @@ router.post('/confirmPin', function (req, res, netx) {
             var form;
 
             if (result[0].control_command == "Engine Start") {
-              form = engineStartForm(pin, uuid_state, result[0].temp);
+              //form = engineStartForm(pin, uuid_state, result[0].temp);
+              form = engineStartForm(pin, state, result[0].temp);
             } else if (result[0].control_command == "Engine Stop") {
-              form = engineStopForm(pin, uuid_state);
+              //form = engineStopForm(pin, uuid_state);
+              form = engineStopForm(pin, state);
             } else if (result[0].control_command == "Close Door") {
-              form = closeDoorForm(pin, uuid_state);
+              //form = closeDoorForm(pin, uuid_state);
+              form = closeDoorForm(pin, state);
             } else if (result[0].control_command == "Light Control" || result[0].control_command == "Horn Control") {
-              form = emergencyFlashingHornForm(pin, uuid_state);
+              //form = emergencyFlashingHornForm(pin, uuid_state);
+              form = emergencyFlashingHornForm(pin, state);
             } else if (result[0].control_command == "Charge On Control") {
-              form = chargeOnForm(pin, uuid_state);
+              //form = chargeOnForm(pin, uuid_state);
+              form = chargeOnForm(pin, state);
             } else if (result[0].control_command == "Charge Off Control") {
-              form = chargeOffForm(pin, uuid_state);
+              //form = chargeOffForm(pin, uuid_state);
+              form = chargeOffForm(pin, state);
             }
 
             formData = JSON.stringify(form);
