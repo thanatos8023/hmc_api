@@ -608,10 +608,9 @@ router.post('/controlcallbackurl', function (req, res, next) {
     console.log("SERVER :: Request controlcallback! :: vehicle status change");
     console.log("msgId : " + msgId + " resultCode : " + resultCode + " resultMsg : " + resultMsg);
 
-    res.sendStatue(200);
+    res.sendStatus(200);
+    res.end();
   });
-
-  res.sendStatue(500);
 });
 
 
