@@ -607,9 +607,11 @@ router.post('/controlcallbackurl', function (req, res, next) {
     console.log(date.toFormat('YYYY-MM-DD HH24:MI:SS'));
     console.log("SERVER :: Request controlcallback! :: vehicle status change");
     console.log("msgId : " + msgId + " resultCode : " + resultCode + " resultMsg : " + resultMsg);
+
+    res.sendStatue(200);
   });
 
-  res.sendStatue(200);
+  res.sendStatue(500);
 });
 
 
