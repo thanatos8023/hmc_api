@@ -645,7 +645,6 @@ router.post('/message', function (req, res, next) {
       if (userResult.length === 0) { //사용자 정보가 DB에 존재하지 않음. 회원가입 유도.
         console.log("SERVER :: Not User :: " + object.user_key);
 
-        /*
         var resSQL = 'SELECT * FROM `tb_response_text` WHERE `intention` = ?'
         connection.query(resSQL, "Welcome", function (resError, resResult, body) {
           if (resError) {
@@ -673,18 +672,30 @@ router.post('/message', function (req, res, next) {
               return udtErr
             }
 
-            res.json({
-              "type": "messageButton",
-              "text": resResult[0].response_text,
-              "object1": JSON.stringify(button)
+            var stmt = 'insert into `tb_command` set `user_id` = ?'; //TB_ETC_COMMAND에 데이터를 한번 넣어놓고 추후 DELTE->INSERT 구문을 UPDATE로 변경하기 위해 입력
+            connection.query(stmt, object.user_key, function (err, _result) {
+              var stmt = 'select * from `tb_user_info` where `user_id` = ?';
+              connection.query(stmt, state, function (err, result) {
+                if (err) {
+                  return err;
+                } else if (result.length === 0) { //카카오 사용자 정보가 데이터베이스에 존재하지 않으면 호출
+                  console.log("SERVER :: New Join " + state);
+
+                  var stmt = 'insert into `tb_user_info` set `user_id` = ?, `authorization` = ?, `access_token` =?, `refresh_token` = ?, `token_type` = ?, `vehicleId` = ?, `pin` = ?, `vehicleType` = ?';
+                  connection.query(stmt, [object.user_key, "authorization", "access_token", "refresh_token", "token_type", "vehicleId", '1234', "type"], function (err, result) {
+                    res.json({
+                      "type": "messageButton",
+                      "text": resResult[0].response_text,
+                      "object1": JSON.stringify(button)
+                    });
+                  });
+                }
+              });
             });
           });
         });
-        */
       //추후 차량이 없는 회원이 가입했을 때 탈퇴 시킨 후 다시 회원가입 하면서 차량을 등록하라고 메세지 띄울 곳. 
       } else if (userResult[0].vehicleId == null || userResult[0].vehicleId == "") { //차량번호가 존재하지 않으면 차량 등록 안내 메세지
-        console.log("SERVER :: No Car :: " + object.user_key);
-        /*
         console.log("SERVER :: Not User :: " + object.user_key);
 
         var resSQL = 'SELECT * FROM `tb_response_text` WHERE `intention` = ?'
@@ -721,10 +732,8 @@ router.post('/message', function (req, res, next) {
             });
           });
         });
-        */
       } else { // 사용자 정보가 존재 
         //카카오 사용자 정보가 DB에 존재. 서비스 이용가능.
-        /*
         var access_token = userResult[0].access_token;
         var authorization = userResult[0].authorization;
         var refresh_token = userResult[0].refresh_token;
@@ -733,7 +742,6 @@ router.post('/message', function (req, res, next) {
         var saved_pin = userResult[0].pin;
         var vehicleId = userResult[0].vehicleId;
         var type = userResult[0].vehicleType;
-        */
 
         console.log("user command : " + object.content);
         console.log("user intention: " + intention);
