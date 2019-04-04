@@ -675,7 +675,7 @@ router.post('/message', function (req, res, next) {
             var stmt = 'insert into `tb_command` set `user_id` = ?'; //TB_ETC_COMMAND에 데이터를 한번 넣어놓고 추후 DELTE->INSERT 구문을 UPDATE로 변경하기 위해 입력
             connection.query(stmt, object.user_key, function (err, _result) {
               var stmt = 'select * from `tb_user_info` where `user_id` = ?';
-              connection.query(stmt, state, function (err, result) {
+              connection.query(stmt, object.user_key, function (err, result) {
                 if (err) {
                   return err;
                 } else if (result.length === 0) { //카카오 사용자 정보가 데이터베이스에 존재하지 않으면 호출
