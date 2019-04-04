@@ -121,7 +121,7 @@ function get_intention(object, callback) {
         var sql = 'SELECT * FROM `tb_food_list` WHERE `name` = ?'
         connection.query(sql, object.content, function(err, foodResult, body) {
           if (err) {
-            console.error("TB_FOOD_LIST connection error");
+            console.error("tb_food_list connection error");
             callback(err);
           }
           console.log(foodResult);
@@ -130,7 +130,7 @@ function get_intention(object, callback) {
             var sql = 'SELECT * FROM `tb_tour_list` WHERE `name` = ?'
             connection.query(sql, object.content, function(err, tourResult, body) {
               if (err) {
-                console.error("TB_TOUR_LIST connection error");
+                console.error("tb_food_list connection error");
                 callback(err);
               }
 
@@ -329,7 +329,7 @@ router.get('/insertPin', function (req, res, next) {
 });
 
 router.get('/conversationDB', function (req, res, next) {
-  var stmt = 'select * from `TB_CONVERSATION`';
+  var stmt = 'select * from `tb_conversation`';
   connection.query(stmt, function (err, result) {
     res.render('conversationDB', {
       title: "conversationDB",
@@ -349,7 +349,7 @@ router.post('/confirmPin', function (req, res, netx) {
   console.log("state : " + state);
   console.log("pin : " + pin);
 
-  var stmt = 'select * from `TB_USER_INFO` where `user_id` = ?';
+  var stmt = 'select * from `tb_user_info` where `user_id` = ?';
   connection.query(stmt, state, function (err, result) {
     if (err) {
       return err;
@@ -365,7 +365,7 @@ router.post('/confirmPin', function (req, res, netx) {
       } else if (result[0].pin == pin) { //사용자 DB에 존재하는 Pin값이 사용자가 입력한 핀값과 맞을 시
         console.log("SERVER :: Pin Correct : " + pin);
         access_token = result[0].access_token;
-        var stmt = 'select * from `TB_COMMAND` where `user_id` = ?';
+        var stmt = 'select * from `tb_command` where `user_id` = ?';
         connection.query(stmt, state, function (err, result) {
           if (err) {
             return err;
@@ -465,7 +465,7 @@ router.post('/confirmPin', function (req, res, netx) {
                   });
 
                   var control_command = result[0].control_command;
-                  var stmt = 'update `TB_COMMAND` set  `status` = ? where `user_id` = ?';
+                  var stmt = 'update `tb_command` set  `status` = ? where `user_id` = ?';
                   connection.query(stmt, ["8000", state], function (err, result) {
                     if (err) {
                       console.log("SERVER :: 8000");
@@ -543,9 +543,9 @@ router.get('/oauth2url', function (req, res, next) {
     var refresh_token = obj.refresh_token;
     var token_type = obj.token_type;
 
-    var stmt = 'insert into `TB_COMMAND` set `user_id` = ?'; //TB_ETC_COMMAND에 데이터를 한번 넣어놓고 추후 DELTE->INSERT 구문을 UPDATE로 변경하기 위해 입력
+    var stmt = 'insert into `tb_command` set `user_id` = ?'; //TB_ETC_COMMAND에 데이터를 한번 넣어놓고 추후 DELTE->INSERT 구문을 UPDATE로 변경하기 위해 입력
     connection.query(stmt, state, function (err, result) {
-      var stmt = 'select * from `TB_USER_INFO` where `user_id` = ?';
+      var stmt = 'select * from `tb_user_info` where `user_id` = ?';
       connection.query(stmt, state, function (err, result) {
         if (err) {
           return err;
@@ -571,7 +571,7 @@ router.get('/oauth2url', function (req, res, next) {
             var vehicleId = obj.vehicles[0].vehicleId;
             var type = obj.vehicles[0].type;
 
-            var stmt = 'insert into `TB_USER_INFO` set `user_id` = ?, `authorization` = ?, `access_token` =?, `refresh_token` = ?, `token_type` = ?, `vehicleId` = ?, `pin` = ?, `vehicleType` = ?';
+            var stmt = 'insert into `tb_user_info` set `user_id` = ?, `authorization` = ?, `access_token` =?, `refresh_token` = ?, `token_type` = ?, `vehicleId` = ?, `pin` = ?, `vehicleType` = ?';
             connection.query(stmt, [state, code, access_token, refresh_token, token_type, vehicleId, '1234', type], function (err, result) {
               var num_arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
               shuffle(num_arr)
@@ -607,7 +607,7 @@ router.post('/controlcallbackurl', function (req, res, next) {
   var msgId = req.body.msgId;
   var strArr = msgId.split('&');
 
-  var stmt = 'update `TB_COMMAND` set  `control_command` = ?, `status` = ?, `temp` = ? where `user_id` = ?';
+  var stmt = 'update `tb_command` set  `control_command` = ?, `status` = ?, `temp` = ? where `user_id` = ?';
   connection.query(stmt, [null, resultCode, null, strArr[0]], function (err, result) {
     var date = new Date();
     console.log(date.toFormat('YYYY-MM-DD HH24:MI:SS'));
