@@ -633,7 +633,7 @@ router.post('/message', function (req, res, next) {
   };
 
   get_intention(object, function(err, intention) {
-    var userSQL = 'select * from `TB_USER_INFO` where `user_id` = ?';
+    var userSQL = 'select * from tb_user_info where user_id = ?';
     connection.query(userSQL, object.user_key, function (userErr, userResult) {
       if (userErr) {
         console.error("SERVER :: DB ERROR :: tb_user_info connection error");
