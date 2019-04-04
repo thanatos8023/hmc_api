@@ -26,8 +26,6 @@ mysql_dbc.test_open(connection);
 var io = require('socket.io')(2231);
 router.io = io;
 
-router.use(express.static('public'))
-
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
