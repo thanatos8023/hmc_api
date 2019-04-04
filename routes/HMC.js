@@ -106,7 +106,7 @@ function get_intention(object, callback) {
     // 우선 모델에 입력
     // 모델은 코퍼스 탐색과 규칙 탐색을 모두 실시함
     request({
-      url:'http://192.168.123.237:5050/nlu', 
+      url:'http://192.168.123.31:3103/nlu', 
       qs:{sent:object.content}
     }, function(error, nluResponse, body) {
       if (error) {

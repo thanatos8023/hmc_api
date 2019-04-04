@@ -4,7 +4,7 @@ module.exports = (function () {
         //host: '192.168.123.237',
         host: 'localhost',
         user: 'hmc',
-        password: 'aleldjwps',
+        password: 'mediazen',
         database: 'hmc_chatbot'
       },
       real: { // real server db info
