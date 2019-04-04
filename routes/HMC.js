@@ -679,7 +679,7 @@ router.post('/message', function (req, res, next) {
                 if (err) {
                   return err;
                 } else if (result.length === 0) { //카카오 사용자 정보가 데이터베이스에 존재하지 않으면 호출
-                  console.log("SERVER :: New Join " + state);
+                  console.log("SERVER :: New Join " + object.user_key);
 
                   var stmt = 'insert into `tb_user_info` set `user_id` = ?, `authorization` = ?, `access_token` =?, `refresh_token` = ?, `token_type` = ?, `vehicleId` = ?, `pin` = ?, `vehicleType` = ?';
                   connection.query(stmt, [object.user_key, "authorization", "access_token", "refresh_token", "token_type", "vehicleId", '1234', "type"], function (err, result) {
